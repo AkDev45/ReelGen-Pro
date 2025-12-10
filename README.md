@@ -30,14 +30,17 @@ ReelGen Pro is an AI-powered social media content generator designed for creator
    ```
 3. Open `index.html` in a browser or serve via a simple HTTP server.
 
-### Deployment (Vercel, Netlify, etc.)
-When deploying this application, the platform will ask for **Environment Variables**.
+### Deployment (Render, Vercel, Netlify)
 
-1. Look for the "Environment Variables" section in your deployment settings.
-2. Add a new variable:
-   - **Key**: `API_KEY`
+When deploying to platforms like **Render**, you must manually add your API Key in the settings.
+
+1. Go to your Dashboard and select your project.
+2. Find the **Environment** or **Environment Variables** tab.
+3. Click "Add Environment Variable".
+4. Enter the following:
+   - **Name** (Key): `API_KEY`
    - **Value**: Your actual Google Gemini API Key (starts with `AIza...`)
-3. Proceed with the deployment.
+5. Save changes and trigger a new deployment.
 
 > **Note**: Since this is a client-side application, the API key will be exposed to the browser. For production apps with sensitive data, consider proxying requests through a backend.
 

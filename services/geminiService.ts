@@ -3,7 +3,9 @@ import { AIAnalysisResult, ScriptRemixResult } from "../types";
 
 // Initialize Gemini SDK
 // Note: process.env.API_KEY is expected to be available in the environment
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// We use a fallback empty string to prevent the app from crashing on load if the key is missing.
+const apiKey = process.env.API_KEY || "";
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 const modelId = "gemini-2.5-flash"; // Multimodal, fast model suitable for video analysis
 
@@ -12,6 +14,10 @@ export const analyzeVideoContent = async (
   mimeType: string
 ): Promise<AIAnalysisResult> => {
   
+  if (!apiKey || apiKey.includes("your_google_ai")) {
+    throw new Error("API Key is missing. Please add API_KEY to your environment variables.");
+  }
+
   // Define the expected JSON schema for the response
   const responseSchema = {
     type: Type.OBJECT,
@@ -153,6 +159,10 @@ export const remixVideoScript = async (
   mimeType: string
 ): Promise<ScriptRemixResult> => {
   
+  if (!apiKey || apiKey.includes("your_google_ai")) {
+    throw new Error("API Key is missing. Please add API_KEY to your environment variables.");
+  }
+
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
@@ -165,7 +175,7 @@ export const remixVideoScript = async (
         items: {
           type: Type.OBJECT,
           properties: {
-            title: { type: Type.STRING, description: "The style or angle of this script variation (e.g., 'Punchier', 'Storytelling')" },
+            title: { type: Type.STRING, description: "The style or angle of this script variation (e.g. 'Punchier', 'Storytelling')" },
             content: { type: Type.STRING, description: "The full script text for this variation." }
           },
           required: ["title", "content"]
