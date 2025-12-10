@@ -20,14 +20,26 @@ ReelGen Pro is an AI-powered social media content generator designed for creator
 - **AI**: Google Gemini API (@google/genai)
 - **Environment**: Google AI Studio / Client-side rendering
 
-## Setup
+## Setup & Deployment
 
+### Local Development
 1. Clone the repository.
-2. Create a `.env` file with your API key:
+2. Create a `.env` file in the root directory:
    ```
    API_KEY=your_google_ai_studio_key
    ```
-3. Open `index.html` in a browser or serve via a simple HTTP server (e.g., `npx serve`).
+3. Open `index.html` in a browser or serve via a simple HTTP server.
+
+### Deployment (Vercel, Netlify, etc.)
+When deploying this application, the platform will ask for **Environment Variables**.
+
+1. Look for the "Environment Variables" section in your deployment settings.
+2. Add a new variable:
+   - **Key**: `API_KEY`
+   - **Value**: Your actual Google Gemini API Key (starts with `AIza...`)
+3. Proceed with the deployment.
+
+> **Note**: Since this is a client-side application, the API key will be exposed to the browser. For production apps with sensitive data, consider proxying requests through a backend.
 
 ## License
 
