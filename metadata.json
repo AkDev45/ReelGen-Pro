@@ -1,0 +1,5 @@
+{
+  "name": "ReelGen Pro",
+  "description": "AI-powered social media content generator. Upload a video to instantly generate viral captions, hashtags, scripts, and posting schedules using Gemini 2.5 Flash.",
+  "requestFramePermissions": []
+}
