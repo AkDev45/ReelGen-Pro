@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import VideoUploader from './components/VideoUploader';
 import ResultsGrid from './components/ResultsGrid';
 import ScriptRemixResults from './components/ScriptRemixResults';
