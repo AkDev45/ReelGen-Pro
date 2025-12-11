@@ -52,6 +52,23 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
         </div>
       </div>
 
+      {/* --- NEW ROW: REEL GEN ROAST --- */}
+      <div className="col-span-1 md:col-span-12 bg-gradient-to-r from-orange-900/40 via-red-900/30 to-slate-900/50 backdrop-blur-md rounded-2xl p-6 border border-orange-500/30 flex items-center gap-6 relative overflow-hidden shadow-lg shadow-orange-900/10">
+        <div className="absolute -right-8 -top-8 text-[8rem] opacity-5 rotate-12 select-none">🔥</div>
+        <div className="hidden md:flex h-16 w-16 bg-orange-500/20 rounded-full items-center justify-center shrink-0 border border-orange-500/40 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+            <span className="text-3xl" role="img" aria-label="devil">😈</span>
+        </div>
+        <div className="relative z-10 w-full">
+            <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-bold text-orange-200 uppercase tracking-wide">Reel Gen Roast</h3>
+                <span className="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-0.5 rounded border border-orange-500/30 font-bold">AI UNCENSORED</span>
+            </div>
+            <p className="text-orange-100/90 text-sm md:text-base italic font-medium leading-relaxed">
+                "{results.roast}"
+            </p>
+        </div>
+      </div>
+
       {/* --- NEW UNIQUE FEATURES ROW --- */}
       
       {/* Feature 1: Brand Deal Scout */}

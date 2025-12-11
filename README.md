@@ -4,7 +4,7 @@ ReelGen Pro is an AI-powered social media content generator designed for creator
 
 ## Features
 
-- **Video Analysis**: detailed breakdown of hook strength, visual quality, and audio mood.
+- **Video Analysis**: Detailed breakdown of hook strength, visual quality, and audio mood.
 - **Viral Content Generation**:
   - 3 engaging caption options.
   - Curated, high-reach hashtags.
@@ -12,6 +12,7 @@ ReelGen Pro is an AI-powered social media content generator designed for creator
 - **Script Remixing**: Transcribes your original audio and generates 3 new script variations (Fast, Story-driven, Bold) to help you re-record better content.
 - **Monetization Scout**: Identifies your niche and suggests potential brand sponsors with a draft pitch.
 - **B-Roll Director**: Suggests specific edits and overlays to improve viewer retention.
+- **Reel Gen Roast**: A savage, unfiltered AI critique of your content to keep you humble.
 
 ## Tech Stack
 

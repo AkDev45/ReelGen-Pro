@@ -29,6 +29,7 @@ export interface AIAnalysisResult {
   audioMood: string;
   engagementBait: string;
   keywords: string[];
+  roast: string;
   // Unique Features
   bRollSuggestions: BRollSuggestion[];
   brandDealScout: BrandDealScout;

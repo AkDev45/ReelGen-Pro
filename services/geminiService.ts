@@ -82,6 +82,10 @@ export const analyzeVideoContent = async (
         items: { type: Type.STRING },
         description: "5 SEO keywords to include naturally in the video description text."
       },
+      roast: {
+        type: Type.STRING,
+        description: "A savage, humorous, slightly mean roast of the video content or creator's performance. Max 2 sentences."
+      },
       // New Unique Feature 1: Magic B-Roll Director
       bRollSuggestions: {
         type: Type.ARRAY,
@@ -107,7 +111,7 @@ export const analyzeVideoContent = async (
         required: ["niche", "potentialSponsors", "pitchDraft"]
       }
     },
-    required: ["captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore", "hookStrength", "hookSuggestion", "visualQuality", "audioMood", "engagementBait", "keywords", "bRollSuggestions", "brandDealScout"]
+    required: ["captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore", "hookStrength", "hookSuggestion", "visualQuality", "audioMood", "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout"]
   };
 
   try {
@@ -129,8 +133,9 @@ export const analyzeVideoContent = async (
             2. Production quality.
             3. Monetization potential (Brand Deal Scout).
             4. Editing improvements (B-Roll Director).
+            5. A savage, humorous Roast (Reel Gen Roast).
             
-            Provide viral captions, hashtags, script structure, story ideas, SEO keywords, posting times, b-roll suggestions, and brand pitch. Output purely in JSON.`
+            Provide viral captions, hashtags, script structure, story ideas, SEO keywords, posting times, b-roll suggestions, brand pitch, and the roast. Output purely in JSON.`
           }
         ]
       },

@@ -121,7 +121,7 @@ function App() {
 
         {/* Footer */}
         <footer className="mt-20 border-t border-slate-800/50 pt-8 text-center text-slate-500 text-sm">
-          <p>© {new Date().getFullYear()} Social Hubspot. Built with React & Google Gemini API.</p>
+          <p>© {new Date().getFullYear()} Social Hubspot.</p>
         </footer>
       </div>
     </div>
