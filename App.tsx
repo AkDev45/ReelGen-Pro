@@ -3,19 +3,32 @@ import VideoUploader from './components/VideoUploader';
 import ResultsGrid from './components/ResultsGrid';
 import ScriptRemixResults from './components/ScriptRemixResults';
 import { VideoState, AIAnalysisResult, ScriptRemixResult } from './types';
-import { analyzeVideoContent, remixVideoScript } from './services/geminiService';
+import { 
+  analyzeVideoContent, 
+  remixVideoScript, 
+  analyzeScriptContent, 
+  remixScriptContent 
+} from './services/geminiService';
 import { fileToBase64 } from './utils/videoHelpers';
 
 function App() {
+  // Input State
+  const [inputType, setInputType] = useState<'video' | 'script'>('video');
+  
+  // Video Input State
   const [videoState, setVideoState] = useState<VideoState>({
     file: null,
     url: null,
   });
-  
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Script Input State
+  const [scriptText, setScriptText] = useState('');
   
+  // App Mode State
   const [mode, setMode] = useState<'analyze' | 'remix'>('analyze');
   
+  // Results State
   const [analysisResults, setAnalysisResults] = useState<AIAnalysisResult | null>(null);
   const [remixResults, setRemixResults] = useState<ScriptRemixResult | null>(null);
   
@@ -23,43 +36,54 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = (file: File) => {
-    // Reset state on new file
     if (videoState.url) URL.revokeObjectURL(videoState.url);
-    
     setVideoState({
       file,
       url: URL.createObjectURL(file),
     });
-    // Clear outputs on new file
     setAnalysisResults(null);
     setRemixResults(null);
     setError(null);
   };
 
-  const handleProcessVideo = async () => {
-    if (!videoState.file) return;
-
+  const handleProcess = async () => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      // 1. Convert video to base64 for Gemini API
-      const base64Video = await fileToBase64(videoState.file);
-      
-      // 2. Call Gemini Service based on Mode
-      if (mode === 'analyze') {
-        const result = await analyzeVideoContent(base64Video, videoState.file.type);
-        setAnalysisResults(result);
-        setRemixResults(null);
-      } else if (mode === 'remix') {
-        const result = await remixVideoScript(base64Video, videoState.file.type);
-        setRemixResults(result);
-        setAnalysisResults(null);
+      if (inputType === 'video') {
+        if (!videoState.file) return;
+        
+        const base64Video = await fileToBase64(videoState.file);
+        
+        if (mode === 'analyze') {
+          const result = await analyzeVideoContent(base64Video, videoState.file.type);
+          setAnalysisResults(result);
+          setRemixResults(null);
+        } else {
+          const result = await remixVideoScript(base64Video, videoState.file.type);
+          setRemixResults(result);
+          setAnalysisResults(null);
+        }
+
+      } else {
+        // Script Input Mode
+        if (!scriptText.trim()) return;
+
+        if (mode === 'analyze') {
+          const result = await analyzeScriptContent(scriptText);
+          setAnalysisResults(result);
+          setRemixResults(null);
+        } else {
+          const result = await remixScriptContent(scriptText);
+          setRemixResults(result);
+          setAnalysisResults(null);
+        }
       }
       
     } catch (err) {
       console.error(err);
-      setError(`Failed to process video. ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError(`Failed to process content. ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -76,7 +100,7 @@ function App() {
               ReelGen Pro
             </h1>
             <p className="text-slate-400 mt-2 max-w-md mx-auto md:mx-0">
-              Transform raw footage into viral gold. AI-powered captions, tags, and strategy in seconds.
+              Transform videos or scripts into viral gold. AI-powered captions, tags, and strategy.
             </p>
           </div>
           
@@ -93,11 +117,16 @@ function App() {
           <VideoUploader 
             videoState={videoState}
             onFileSelect={handleFileSelect}
-            onProcess={handleProcessVideo}
+            onProcess={handleProcess}
             isProcessing={isProcessing}
             mode={mode}
             setMode={setMode}
             videoRef={videoRef}
+            // New props
+            inputType={inputType}
+            setInputType={setInputType}
+            scriptText={scriptText}
+            setScriptText={setScriptText}
           />
 
           {error && (
@@ -107,7 +136,6 @@ function App() {
           )}
 
           <div id="results-area">
-            {/* Conditional Rendering based on Mode */}
             {mode === 'analyze' && analysisResults && (
               <ResultsGrid results={analysisResults} />
             )}
