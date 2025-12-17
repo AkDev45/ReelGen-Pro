@@ -222,29 +222,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <div className="mt-12 pt-12 border-t border-white/5 animate-in slide-in-from-bottom-10 duration-700 text-left space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Metric 1: Virality Score */}
-                  <div className="glass p-8 rounded-3xl border border-white/10 text-center flex flex-col items-center justify-center">
-                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-6">Virality Score</p>
-                     <div className="relative w-32 h-32 flex items-center justify-center">
-                        <svg className="w-full h-full -rotate-90">
+                  <div className="glass p-8 rounded-3xl border border-white/10 text-center flex flex-col items-center justify-center relative overflow-hidden">
+                     {/* Decorative background blur to make it pop */}
+                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl pointer-events-none"></div>
+                     
+                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-6 relative z-10">Virality Score</p>
+                     
+                     <div className="relative w-40 h-40 flex items-center justify-center z-10">
+                        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                           {/* Track */}
                            <circle
-                              cx="64" cy="64" r="58"
+                              cx="60" cy="60" r="54"
                               stroke="currentColor" strokeWidth="8"
                               fill="transparent"
                               className="text-white/5"
                            />
+                           {/* Progress */}
                            <circle
-                              cx="64" cy="64" r="58"
+                              cx="60" cy="60" r="54"
                               stroke="currentColor" strokeWidth="8"
                               fill="transparent"
-                              strokeDasharray={364.4}
-                              strokeDashoffset={364.4 - (364.4 * demoResult.score) / 100}
-                              className={`transition-all duration-1000 ease-out ${demoResult.score > 80 ? 'text-emerald-500' : demoResult.score > 50 ? 'text-amber-500' : 'text-rose-500'}`}
+                              strokeDasharray={339.292} // 2 * pi * 54
+                              strokeDashoffset={339.292 - (339.292 * demoResult.score) / 100}
+                              strokeLinecap="round"
+                              className={`transition-all duration-1000 ease-out ${demoResult.score > 80 ? 'text-emerald-500 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]' : demoResult.score > 50 ? 'text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]'}`}
                            />
                         </svg>
-                        <span className="absolute text-3xl font-black text-white">{demoResult.score}</span>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                           <span className="text-4xl font-black text-white tracking-tighter">{demoResult.score}</span>
+                           <span className="text-[10px] font-bold text-slate-500 uppercase">/ 100</span>
+                        </div>
                      </div>
-                     <p className="text-[10px] text-slate-500 font-medium mt-6 uppercase tracking-wider">
-                        Estimated viral potential based on hook & clarity
+                     
+                     <p className="text-[10px] text-slate-500 font-medium mt-6 uppercase tracking-wider relative z-10">
+                        Estimated viral potential
                      </p>
                   </div>
 
