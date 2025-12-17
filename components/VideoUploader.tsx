@@ -103,7 +103,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
       {/* --- BODY: MAIN CONTENT AREA --- */}
       <div className="p-8 md:p-12 min-h-[400px] flex flex-col md:flex-row gap-8 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-opacity-5">
         
-        {/* LEFT: INPUT */}
+        {/* LEFT: INPUT (Visual Desktop Left, DOM First) */}
         <div className="w-full md:w-1/2 flex flex-col">
           {inputType === 'video' ? (
              <div 
@@ -151,7 +151,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
           )}
         </div>
 
-        {/* RIGHT: PREVIEW */}
+        {/* RIGHT: PREVIEW (Visual Desktop Right, DOM Second) */}
         <div className="w-full md:w-1/2 flex flex-col">
             <div className="flex-1 bg-black rounded-2xl border border-white/10 overflow-hidden relative shadow-2xl flex items-center justify-center group">
                {/* Reflection */}
@@ -196,6 +196,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
                </div>
             )}
         </div>
+        
       </div>
 
       {/* --- COMMAND BAR (BOTTOM) --- */}
