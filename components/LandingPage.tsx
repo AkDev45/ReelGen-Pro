@@ -378,12 +378,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               title="Auto Reel Analysis"
               desc="Breaks down hook strength, visuals, audio mood, and retention killers."
             />
-            {/* Card 2 */}
-            <BentoCard 
-              colSpan="md:col-span-1"
-              icon="✍️"
-              title="Script Remixing"
-              desc="Fast, Story-driven, or Bold variations generated instantly."
+             {/* Wide Card 2 (Script Doctor) */}
+             <BentoCard 
+               colSpan="md:col-span-1"
+               icon="🚑"
+               title="Script Doctor"
+               desc="Golden Feature: Tells you exactly what sentences to add and remove to fix pacing."
+               highlight
+               gradient="from-yellow-900/20 to-amber-900/20"
             />
             {/* Tall Card 3 */}
             <BentoCard 
@@ -406,7 +408,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                icon="😈"
                title="ReelGen Roast"
                desc="A savage, unfiltered AI critique. Sugarcoating kills growth."
-               highlight
             />
              {/* Wide Card 6 */}
              <BentoCard 
@@ -465,8 +466,8 @@ const BentoCard = ({
   highlight?: boolean,
   gradient?: string
 }) => (
-  <div className={`${colSpan} bg-[#111] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between ${highlight ? 'border-orange-500/20' : ''}`}>
-    {highlight && <div className="absolute inset-0 bg-orange-500/5 pointer-events-none"></div>}
+  <div className={`${colSpan} bg-[#111] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between ${highlight ? 'border-amber-500/20' : ''}`}>
+    {highlight && <div className="absolute inset-0 bg-amber-500/5 pointer-events-none"></div>}
     {gradient && <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-50 pointer-events-none`}></div>}
     
     <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
@@ -475,7 +476,7 @@ const BentoCard = ({
 
     <div className="text-4xl mb-6 relative z-10">{icon}</div>
     <div className="relative z-10">
-      <h3 className={`text-xl font-bold mb-3 ${highlight ? 'text-orange-200' : 'text-slate-200'}`}>{title}</h3>
+      <h3 className={`text-xl font-bold mb-3 ${highlight ? 'text-amber-200' : 'text-slate-200'}`}>{title}</h3>
       <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
     </div>
   </div>

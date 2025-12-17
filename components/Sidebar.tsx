@@ -9,13 +9,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isCollapsed, toggleCollapse }) => {
-  // Mock Data for "Persistent" Feel
-  const recentProjects: ProjectItem[] = [
-    { id: '1', title: 'Viral Hook Test #1', date: '2 hrs ago', type: 'video', score: 85 },
-    { id: '2', title: 'Monday Motivation', date: 'Yesterday', type: 'script', score: 92 },
-    { id: '3', title: 'Product Launch V2', date: '3 days ago', type: 'video', score: 64 },
-    { id: '4', title: 'GRWM Story', date: 'Last week', type: 'video', score: 78 },
-  ];
+  // Fake blur data
+  const fakeProjects = [1, 2, 3, 4];
 
   return (
     <aside 
@@ -53,40 +48,45 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isCollapse
                 onClick={() => onChangeView('app')}
               />
               <NavItem 
-                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>}
-                label="Templates"
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>}
+                label="Learnings"
+                active={currentView === 'learnings'}
                 collapsed={isCollapsed}
-                onClick={() => {}}
-              />
-              <NavItem 
-                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>}
-                label="Trends"
-                collapsed={isCollapsed}
-                onClick={() => {}}
-                badge="HOT"
+                onClick={() => onChangeView('learnings')}
+                badge="NEW"
               />
            </nav>
         </div>
 
-        <div className="px-4">
+        <div className="px-4 relative group">
            {!isCollapsed && <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Recent Projects</h3>}
-           <div className="space-y-1">
-              {recentProjects.map((project) => (
-                <button
-                  key={project.id}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${isCollapsed ? 'justify-center' : 'justify-start hover:bg-white/5'}`}
+           
+           {/* Coming Soon Overlay */}
+           <div className={`absolute inset-0 z-10 flex items-center justify-center bg-[#080808]/10 backdrop-blur-[1px] transition-opacity ${isCollapsed ? 'opacity-0 hover:opacity-100' : ''}`}>
+             {!isCollapsed && (
+               <div className="bg-black/80 border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-md">
+                 <svg className="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                 <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wide">Syncing History...</span>
+               </div>
+             )}
+           </div>
+
+           {/* Blurred Content */}
+           <div className="space-y-1 opacity-20 select-none grayscale" aria-hidden="true">
+              {fakeProjects.map((id) => (
+                <div
+                  key={id}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : 'justify-start'}`}
                 >
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${
-                    project.score && project.score > 80 ? 'bg-emerald-500' : project.score && project.score > 60 ? 'bg-amber-500' : 'bg-slate-600'
-                  }`}></div>
+                  <div className="w-2 h-2 rounded-full bg-slate-600 shrink-0"></div>
                   
                   {!isCollapsed && (
-                    <div className="text-left overflow-hidden">
-                      <p className="text-sm text-slate-300 truncate group-hover:text-white transition-colors">{project.title}</p>
-                      <p className="text-[10px] text-slate-600 truncate">{project.date} • {project.type}</p>
+                    <div className="text-left w-full">
+                      <div className="h-3 bg-slate-700 rounded w-3/4 mb-1.5"></div>
+                      <div className="h-2 bg-slate-800 rounded w-1/2"></div>
                     </div>
                   )}
-                </button>
+                </div>
               ))}
            </div>
         </div>

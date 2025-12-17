@@ -1,6 +1,5 @@
 import React from 'react';
 import { AIAnalysisResult } from '../types';
-import ThumbnailPreview from './ThumbnailPreview';
 
 interface ResultsGridProps {
   results: AIAnalysisResult | null;
@@ -53,9 +52,65 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
         </div>
       </div>
 
-      {/* --- NEW ROW: THUMBNAIL ARCHITECT --- */}
-      <div className="col-span-1 md:col-span-12">
-         <ThumbnailPreview config={results.thumbnailConfig} />
+      {/* --- NEW GOLDEN PRO FEATURE: SCRIPT DOCTOR --- */}
+      <div className="col-span-1 md:col-span-12 bg-gradient-to-br from-[#1a1500] to-black rounded-2xl p-1 border border-yellow-500/40 relative overflow-hidden group shadow-[0_0_30px_-5px_rgba(234,179,8,0.15)]">
+         {/* Gold Shine Effect */}
+         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
+         
+         <div className="bg-[#0A0A0A]/90 h-full w-full rounded-xl p-6 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+               <div>
+                  <h3 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 flex items-center gap-2">
+                     <span className="text-2xl">✨</span> GOLDEN PRO: Script Doctor
+                  </h3>
+                  <p className="text-yellow-500/60 text-xs font-mono tracking-wide mt-1">AI-POWERED SCRIPT OPTIMIZATION ENGINE</p>
+               </div>
+               <span className="bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-yellow-900/20">
+                  UNLOCKED FOR THIS SESSION
+               </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {/* Things to ADD */}
+               <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
+                     Add These Elements
+                  </h4>
+                  <ul className="space-y-2">
+                     {results.scriptAdjustments.toAdd.map((item, i) => (
+                        <li key={i} className="flex gap-3 bg-emerald-900/10 border border-emerald-500/20 p-3 rounded-lg hover:bg-emerald-900/20 transition-colors">
+                           <span className="text-emerald-500 font-mono text-xs mt-0.5">0{i+1}</span>
+                           <span className="text-sm text-slate-300">{item}</span>
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+
+               {/* Things to REMOVE */}
+               <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-rose-400 flex items-center gap-2 uppercase tracking-wider">
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M20 12H4" /></svg>
+                     Remove/Fix These
+                  </h4>
+                   <ul className="space-y-2">
+                     {results.scriptAdjustments.toRemove.map((item, i) => (
+                        <li key={i} className="flex gap-3 bg-rose-900/10 border border-rose-500/20 p-3 rounded-lg hover:bg-rose-900/20 transition-colors">
+                           <span className="text-rose-500 font-mono text-xs mt-0.5">0{i+1}</span>
+                           <span className="text-sm text-slate-300">{item}</span>
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5">
+               <p className="text-xs text-slate-500 italic flex gap-2">
+                  <span className="font-bold text-yellow-500 not-italic">AI Reasoning:</span>
+                  {results.scriptAdjustments.tweakLogic}
+               </p>
+            </div>
+         </div>
       </div>
 
       {/* --- NEW ROW: REEL GEN ROAST --- */}
@@ -66,7 +121,7 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
         </div>
         <div className="relative z-10 w-full">
             <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-bold text-orange-200 uppercase tracking-wide">Reel Gen Roast</h3>
+                <h3 className="text-lg font-bold text-orange-200 uppercase tracking-wide">ReelGen Roast</h3>
                 <span className="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-0.5 rounded border border-orange-500/30 font-bold">AI UNCENSORED</span>
             </div>
             <p className="text-orange-100/90 text-sm md:text-base italic font-medium leading-relaxed">

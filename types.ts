@@ -15,13 +15,10 @@ export interface BrandDealScout {
   pitchDraft: string;
 }
 
-export interface ThumbnailConfig {
-  headline: string;
-  subtext: string;
-  primaryColor: string; // Hex
-  accentColor: string; // Hex
-  layout: 'Face-Focus' | 'Split-Screen' | 'Text-Heavy' | 'Minimalist';
-  description: string;
+export interface ScriptImprovement {
+  toAdd: string[];
+  toRemove: string[];
+  tweakLogic: string;
 }
 
 export interface AIAnalysisResult {
@@ -42,7 +39,7 @@ export interface AIAnalysisResult {
   // Unique Features
   bRollSuggestions: BRollSuggestion[];
   brandDealScout: BrandDealScout;
-  thumbnailConfig: ThumbnailConfig;
+  scriptAdjustments: ScriptImprovement;
 }
 
 export interface ScriptVariation {
@@ -53,6 +50,35 @@ export interface ScriptVariation {
 export interface ScriptRemixResult {
   originalScript: string;
   variations: ScriptVariation[];
+}
+
+export interface ThumbnailConfig {
+  layout: string;
+  primaryColor: string;
+  accentColor: string;
+  headline: string;
+  subtext: string;
+  description: string;
+}
+
+export interface ThumbnailGenResult {
+  imageUrl: string;
+  theme: string;
+  config: {
+    timestamp: string;
+    textOverlay: string;
+    layoutDescription: string;
+    primaryColor: string;
+    secondaryColor: string;
+  };
+}
+
+export interface HookAnalysisResult {
+  score: number;
+  critique: string;
+  rewrites: string[];
+  emotionalTrigger: string;
+  whyItWorks: string;
 }
 
 export interface VideoState {
@@ -75,16 +101,4 @@ export interface AppState {
   loading: boolean;
   error: string | null;
   mode: 'analyze' | 'remix';
-}
-
-export interface ThumbnailGenResult {
-  imageUrl: string;
-  theme: string;
-  config: {
-    timestamp: string;
-    textOverlay: string;
-    layoutDescription: string;
-    primaryColor: string;
-    secondaryColor: string;
-  };
 }

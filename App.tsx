@@ -5,6 +5,7 @@ import ScriptRemixResults from './components/ScriptRemixResults';
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import Sidebar from './components/Sidebar';
+import LearningsPage from './components/LearningsPage';
 import { VideoState, AIAnalysisResult, ScriptRemixResult } from './types';
 import { 
   analyzeVideoContent, 
@@ -14,7 +15,7 @@ import {
 } from './services/geminiService';
 import { fileToBase64 } from './utils/videoHelpers';
 
-type AppView = 'landing' | 'auth' | 'welcome' | 'app';
+type AppView = 'landing' | 'auth' | 'welcome' | 'app' | 'learnings';
 
 function App() {
   // Navigation State
@@ -163,7 +164,9 @@ function App() {
         
         {/* Top Header (App View) */}
         <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/5 bg-[#050505]/80 px-8 h-20 flex items-center justify-between">
-           <h1 className="text-xl font-bold text-white tracking-tight">New Project</h1>
+           <h1 className="text-xl font-bold text-white tracking-tight">
+             {currentView === 'learnings' ? 'Learning Center' : 'New Project'}
+           </h1>
            
            <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -182,49 +185,53 @@ function App() {
            </div>
         </header>
 
-        <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
-          
-          {/* Header Area */}
-          <div className="mb-8">
-             <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">Creator Studio</h2>
-             <p className="text-slate-400 font-light text-lg">
-               Upload raw content. Receive viral strategy.
-             </p>
-          </div>
-
-          <VideoUploader 
-            videoState={videoState}
-            onFileSelect={handleFileSelect}
-            onProcess={handleProcess}
-            isProcessing={isProcessing}
-            mode={mode}
-            setMode={setMode}
-            videoRef={videoRef}
-            inputType={inputType}
-            setInputType={setInputType}
-            scriptText={scriptText}
-            setScriptText={setScriptText}
-            autoFocusScript={true}
-          />
-
-          {error && (
-            <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-center animate-pulse flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {error}
-            </div>
-          )}
-
-          <div id="results-area" className="scroll-mt-24 pb-20">
-            {mode === 'analyze' && analysisResults && (
-              <ResultsGrid results={analysisResults} />
-            )}
+        {currentView === 'learnings' ? (
+          <LearningsPage />
+        ) : (
+          <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
             
-            {mode === 'remix' && remixResults && (
-              <ScriptRemixResults results={remixResults} />
-            )}
-          </div>
+            {/* Header Area */}
+            <div className="mb-8">
+               <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">Creator Studio</h2>
+               <p className="text-slate-400 font-light text-lg">
+                 Upload raw content. Receive viral strategy.
+               </p>
+            </div>
 
-        </div>
+            <VideoUploader 
+              videoState={videoState}
+              onFileSelect={handleFileSelect}
+              onProcess={handleProcess}
+              isProcessing={isProcessing}
+              mode={mode}
+              setMode={setMode}
+              videoRef={videoRef}
+              inputType={inputType}
+              setInputType={setInputType}
+              scriptText={scriptText}
+              setScriptText={setScriptText}
+              autoFocusScript={true}
+            />
+
+            {error && (
+              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-center animate-pulse flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {error}
+              </div>
+            )}
+
+            <div id="results-area" className="scroll-mt-24 pb-20">
+              {mode === 'analyze' && analysisResults && (
+                <ResultsGrid results={analysisResults} />
+              )}
+              
+              {mode === 'remix' && remixResults && (
+                <ScriptRemixResults results={remixResults} />
+              )}
+            </div>
+
+          </div>
+        )}
         
         {/* Footer */}
         <footer className="border-t border-white/5 py-8 text-center text-slate-600 text-xs font-mono ml-0">

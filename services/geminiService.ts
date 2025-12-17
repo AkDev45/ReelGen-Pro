@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AIAnalysisResult, ScriptRemixResult } from "../types";
+import { AIAnalysisResult, ScriptRemixResult, HookAnalysisResult } from "../types";
 
 // Initialize Gemini SDK
 const apiKey = process.env.API_KEY || "";
@@ -96,23 +96,21 @@ const analysisResponseSchema: Schema = {
       },
       description: "Monetization potential and pitch draft.",
     },
-    thumbnailConfig: {
+    scriptAdjustments: {
       type: Type.OBJECT,
       properties: {
-        headline: { type: Type.STRING, description: "Short, punchy text for thumbnail (max 5 words)" },
-        subtext: { type: Type.STRING, description: "Supporting text or emotional trigger" },
-        primaryColor: { type: Type.STRING, description: "Hex code for background/dominant color" },
-        accentColor: { type: Type.STRING, description: "Hex code for text/highlight color" },
-        layout: { type: Type.STRING, enum: ['Face-Focus', 'Split-Screen', 'Text-Heavy', 'Minimalist'] },
-        description: { type: Type.STRING, description: "Visual description of the ideal thumbnail image" },
+        toAdd: { type: Type.ARRAY, items: { type: Type.STRING } },
+        toRemove: { type: Type.ARRAY, items: { type: Type.STRING } },
+        tweakLogic: { type: Type.STRING }
       },
-      description: "Architecture for a high-CTR thumbnail.",
-    },
+      description: "Golden Pro Feature: Specific sentences/concepts to add or remove to maximize retention."
+    }
   },
   required: [
     "captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore",
     "hookStrength", "hookSuggestion", "visualQuality", "audioMood",
-    "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout", "thumbnailConfig"
+    "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout",
+    "scriptAdjustments"
   ],
 };
 
@@ -134,6 +132,18 @@ const remixResponseSchema: Schema = {
   required: ["originalScript", "variations"],
 };
 
+const hookAnalysisResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    score: { type: Type.NUMBER, description: "Virality score 0-100" },
+    critique: { type: Type.STRING, description: "Why the hook is weak or strong" },
+    rewrites: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 improved hook rewrites" },
+    emotionalTrigger: { type: Type.STRING, description: "The primary emotion (Fear, Curiosity, etc.)" },
+    whyItWorks: { type: Type.STRING, description: "Educational explanation of the psychology" }
+  },
+  required: ["score", "critique", "rewrites", "emotionalTrigger", "whyItWorks"]
+};
+
 // --- Analysis Functions ---
 
 export const analyzeVideoContent = async (base64Video: string, mimeType: string): Promise<AIAnalysisResult> => {
@@ -148,9 +158,10 @@ export const analyzeVideoContent = async (base64Video: string, mimeType: string)
     3. **Captions**: Write 3 distinct options (Storytelling, Educational, Controversial).
     4. **Roast**: Be savage. Roast the lighting, acting, or vibe. Make it funny but true.
     5. **Monetization**: Identify the niche and suggest sponsors. Write a 1-sentence DM pitch.
-    6. **Thumbnail Architecture**: Design a high-CTR thumbnail concept. Choose contrasting hex colors (e.g., #FF0000 vs #FFFFFF).
-       - Headline: MUST be clickbait but honest.
-       - Layout: Choose best fit (Face-Focus, Split-Screen, etc).
+    6. **Script Doctor (Golden Feature)**: 
+       - Identify 3 specific things to **ADD** to the script (missing value, context, emotional cues).
+       - Identify 3 specific things to **REMOVE** (fluff, slow intros, jargon).
+       - Explain the logic.
   `;
 
   const response = await ai.models.generateContent({
@@ -179,10 +190,11 @@ export const analyzeScriptContent = async (scriptText: string): Promise<AIAnalys
     
     Script: "${scriptText}"
     
-    Provide the same detailed analysis as if you were watching the video, but focus on the writing, pacing, and hook structure.
-    Infer visual opportunities for the 'Visual Quality' and 'B-Roll' sections.
+    Provide the same detailed analysis as if you were watching the video.
     
-    For Thumbnail Architecture: Design a concept that would make someone click this text-based topic.
+    Crucial: Fill out the 'scriptAdjustments' section with high precision:
+    - What specific lines or concepts are missing? (ADD)
+    - What is killing retention? (REMOVE)
   `;
 
   const response = await ai.models.generateContent({
@@ -251,3 +263,30 @@ export const remixScriptContent = async (scriptText: string): Promise<ScriptRemi
   if (!text) throw new Error("No remix generated.");
   return JSON.parse(text) as ScriptRemixResult;
 };
+
+export const analyzeHook = async (hookText: string): Promise<HookAnalysisResult> => {
+  const prompt = `
+    You are a viral hook expert. Analyze this specific hook text for a short-form video (Reel/TikTok).
+    
+    Hook: "${hookText}"
+    
+    1. Score it (0-100).
+    2. Critique it briefly (clarity, curiosity gap, emotional pull).
+    3. Provide 3 improved versions.
+    4. Identify the emotional trigger (Curiosity, Fear, etc.).
+    5. Explain WHY it works or fails psychologically.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: modelId,
+    contents: { parts: [{ text: prompt }] },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: hookAnalysisResponseSchema,
+    },
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("No hook analysis generated.");
+  return JSON.parse(text) as HookAnalysisResult;
+}
