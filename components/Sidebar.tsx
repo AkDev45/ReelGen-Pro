@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { ProjectItem } from '../types';
+import React from 'react';
 
 interface SidebarProps {
   currentView: string;
