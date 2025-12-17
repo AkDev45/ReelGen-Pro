@@ -24,8 +24,8 @@ function App() {
   // Sidebar State
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Input State
-  const [inputType, setInputType] = useState<'video' | 'script'>('video');
+  // Input State - DEFAULT TO SCRIPT
+  const [inputType, setInputType] = useState<'video' | 'script'>('script');
   
   // Video Input State
   const [videoState, setVideoState] = useState<VideoState>({
@@ -57,7 +57,7 @@ function App() {
     // After 2 seconds, transition to App
     setTimeout(() => {
       setCurrentView('app');
-      setInputType('script');
+      setInputType('script'); // Explicitly ensure script mode
     }, 2000);
   };
 
@@ -107,6 +107,11 @@ function App() {
         }
       }
       
+      // Auto-scroll to results
+      setTimeout(() => {
+        document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+
     } catch (err) {
       console.error(err);
       setError(`Failed to process content. ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -133,7 +138,7 @@ function App() {
               Welcome to ReelGen Pro.
             </h1>
             <p className="text-xl text-slate-400 font-light animate-in slide-in-from-bottom-4 duration-700 delay-200">
-              Let’s make your content sharper.
+              Let’s optimize your scripts for maximum virality.
             </p>
             <div className="flex justify-center mt-8">
                <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"></div>
@@ -165,14 +170,14 @@ function App() {
         {/* Top Header (App View) */}
         <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/5 bg-[#050505]/80 px-8 h-20 flex items-center justify-between">
            <h1 className="text-xl font-bold text-white tracking-tight">
-             {currentView === 'learnings' ? 'Learning Center' : 'New Project'}
+             {currentView === 'learnings' ? 'Learning Center' : 'Neural Studio'}
            </h1>
            
            <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
                   <span className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-                    System Online
+                    Neural Core Online
                   </span>
              </div>
              <button 
@@ -188,13 +193,19 @@ function App() {
         {currentView === 'learnings' ? (
           <LearningsPage />
         ) : (
-          <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
+          <div className="p-8 md:p-12 lg:p-16 max-w-7xl mx-auto space-y-16 animate-in fade-in duration-700">
             
             {/* Header Area */}
-            <div className="mb-8">
-               <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">Creator Studio</h2>
-               <p className="text-slate-400 font-light text-lg">
-                 Upload raw content. Receive viral strategy.
+            <div className="mb-8 space-y-4">
+               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Creator Workbench</span>
+               </div>
+               <h2 className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter leading-tight">
+                  Script & Strategy <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Analysis Lab</span>
+               </h2>
+               <p className="text-slate-400 font-medium text-lg max-w-2xl leading-relaxed">
+                 Turn static text into dynamic growth systems. Paste your draft below to unlock deep viral optimization and retention hooks.
                </p>
             </div>
 
@@ -214,13 +225,14 @@ function App() {
             />
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-center animate-pulse flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                {error}
+              <div className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-2xl text-rose-300 text-center animate-pulse flex flex-col items-center justify-center gap-2">
+                <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p className="font-bold">System Interference Detected</p>
+                <p className="text-sm opacity-70">{error}</p>
               </div>
             )}
 
-            <div id="results-area" className="scroll-mt-24 pb-20">
+            <div id="results-area" className="scroll-mt-32 pb-32">
               {mode === 'analyze' && analysisResults && (
                 <ResultsGrid results={analysisResults} />
               )}
@@ -234,8 +246,8 @@ function App() {
         )}
         
         {/* Footer */}
-        <footer className="border-t border-white/5 py-8 text-center text-slate-600 text-xs font-mono ml-0">
-          <p>© {new Date().getFullYear()} Social Hubspot. Engineered for creators.</p>
+        <footer className="border-t border-white/5 py-12 text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] ml-0">
+          <p>© {new Date().getFullYear()} ReelGen Pro • Neural Content Optimization Engine</p>
         </footer>
 
       </main>

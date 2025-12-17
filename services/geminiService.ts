@@ -5,7 +5,8 @@ import { AIAnalysisResult, ScriptRemixResult, HookAnalysisResult } from "../type
 const apiKey = process.env.API_KEY || "";
 const ai = new GoogleGenAI({ apiKey: apiKey });
 
-const modelId = "gemini-2.5-flash";
+// Using Gemini 3 Flash Preview for optimized text tasks
+const modelId = "gemini-3-flash-preview";
 
 // --- Shared Schemas ---
 
