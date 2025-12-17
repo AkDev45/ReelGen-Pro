@@ -1,280 +1,253 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AIAnalysisResult, ScriptRemixResult } from "../types";
 
 // Initialize Gemini SDK
 const apiKey = process.env.API_KEY || "";
 const ai = new GoogleGenAI({ apiKey: apiKey });
 
-const modelId = "gemini-2.5-flash"; // Multimodal, fast model suitable for video analysis
+const modelId = "gemini-2.5-flash";
 
 // --- Shared Schemas ---
 
-const analysisResponseSchema = {
+const analysisResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
     captions: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "3 engaging, viral-style captions."
+      description: "3 engaging, viral-style captions with hooks.",
     },
     hashtags: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "10 relevant, high-reach hashtags."
+      description: "10-15 high-reach, niche-specific hashtags.",
     },
     postTimes: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          label: { type: Type.STRING, description: "Day and Time" },
-          score: { type: Type.NUMBER, description: "Relevance score 0-1" }
+          label: { type: Type.STRING },
+          score: { type: Type.NUMBER },
         },
-        required: ["label", "score"]
       },
-      description: "3 best estimated times to post based on the content vibe."
+      description: "3 best times to post (e.g., 'Mon 6PM') with a score 0-1.",
     },
     storyIdeas: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "2 ideas for Instagram Stories to promote this reel."
+      description: "3 Instagram Story ideas to promote this reel.",
     },
     script: {
       type: Type.STRING,
-      description: "A structured script (Hook, Body, Call to Action) based on the content."
+      description: "Transcription or structural breakdown of the content.",
     },
     viralScore: {
       type: Type.NUMBER,
-      description: "An estimated viral potential score from 0 to 100."
+      description: "Predicted virality score from 0 to 100.",
     },
     hookStrength: {
       type: Type.NUMBER,
-      description: "Score from 1-10 on how strong the hook is."
+      description: "Score 0-10 for the opening hook.",
     },
     hookSuggestion: {
       type: Type.STRING,
-      description: "Specific advice to improve the hook."
+      description: "A specific suggestion to improve the first 3 seconds.",
     },
     visualQuality: {
       type: Type.STRING,
-      description: "Critique of visual quality (or suggested visual style for scripts)."
+      description: "Brief critique of lighting, framing, and aesthetic.",
     },
     audioMood: {
       type: Type.STRING,
-      description: "Description of the audio vibe (or suggested audio for scripts)."
+      description: "Description of the audio vibe and music recommendation.",
     },
     engagementBait: {
       type: Type.STRING,
-      description: "A specific, slightly controversial or open-ended comment to pin."
+      description: "A controversial or question-based comment to pin.",
     },
     keywords: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "5 SEO keywords."
+      description: "5 SEO keywords for the description.",
     },
     roast: {
       type: Type.STRING,
-      description: "A savage, humorous, slightly mean roast of the content. Max 2 sentences."
+      description: "A savage, short, witty roast of the content.",
     },
     bRollSuggestions: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          timestamp: { type: Type.STRING, description: "Time or Section" },
-          suggestion: { type: Type.STRING, description: "What to show" },
-          type: { type: Type.STRING, enum: ["Meme", "Screenshot", "Stock", "Text"] }
+          timestamp: { type: Type.STRING },
+          suggestion: { type: Type.STRING },
+          type: { type: Type.STRING, enum: ['Meme', 'Screenshot', 'Stock', 'Text'] },
         },
-        required: ["timestamp", "suggestion", "type"]
       },
-      description: "Identify moments where visual interest drops and suggest edits."
+      description: "Suggestions for B-Roll or overlays to improve retention.",
     },
     brandDealScout: {
       type: Type.OBJECT,
       properties: {
-        niche: { type: Type.STRING, description: "Specific micro-niche." },
-        potentialSponsors: { type: Type.ARRAY, items: { type: Type.STRING }, description: "2 types of brands." },
-        pitchDraft: { type: Type.STRING, description: "A professional 1-sentence DM pitch." }
+        niche: { type: Type.STRING },
+        potentialSponsors: { type: Type.ARRAY, items: { type: Type.STRING } },
+        pitchDraft: { type: Type.STRING },
       },
-      required: ["niche", "potentialSponsors", "pitchDraft"]
-    }
+      description: "Monetization potential and pitch draft.",
+    },
+    thumbnailConfig: {
+      type: Type.OBJECT,
+      properties: {
+        headline: { type: Type.STRING, description: "Short, punchy text for thumbnail (max 5 words)" },
+        subtext: { type: Type.STRING, description: "Supporting text or emotional trigger" },
+        primaryColor: { type: Type.STRING, description: "Hex code for background/dominant color" },
+        accentColor: { type: Type.STRING, description: "Hex code for text/highlight color" },
+        layout: { type: Type.STRING, enum: ['Face-Focus', 'Split-Screen', 'Text-Heavy', 'Minimalist'] },
+        description: { type: Type.STRING, description: "Visual description of the ideal thumbnail image" },
+      },
+      description: "Architecture for a high-CTR thumbnail.",
+    },
   },
-  required: ["captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore", "hookStrength", "hookSuggestion", "visualQuality", "audioMood", "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout"]
+  required: [
+    "captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore",
+    "hookStrength", "hookSuggestion", "visualQuality", "audioMood",
+    "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout", "thumbnailConfig"
+  ],
 };
 
-const remixResponseSchema = {
+const remixResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    originalScript: {
-      type: Type.STRING,
-      description: "The original script."
-    },
+    originalScript: { type: Type.STRING },
     variations: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          title: { type: Type.STRING, description: "The style or angle of this variation" },
-          content: { type: Type.STRING, description: "The full script text." }
+          title: { type: Type.STRING },
+          content: { type: Type.STRING },
         },
-        required: ["title", "content"]
       },
-      description: "3 distinct script variations."
-    }
+    },
   },
-  required: ["originalScript", "variations"]
+  required: ["originalScript", "variations"],
 };
 
-// --- VIDEO Functions ---
+// --- Analysis Functions ---
 
-export const analyzeVideoContent = async (
-  base64Video: string, 
-  mimeType: string
-): Promise<AIAnalysisResult> => {
-  
-  if (!apiKey || apiKey.includes("your_google_ai")) {
-    throw new Error("API Key is missing.");
-  }
+export const analyzeVideoContent = async (base64Video: string, mimeType: string): Promise<AIAnalysisResult> => {
+  const prompt = `
+    You are an expert Social Media Strategist and Video Editor for top creators (MrBeast, Alex Hormozi style).
+    Analyze this video for Instagram Reels / TikTok / YouTube Shorts.
+    
+    Provide a brutally honest critique and actionable strategy.
+    
+    1. **Viral Score**: Rate 0-100 based on retention loops, hook, and value.
+    2. **Hook**: Critique the first 3s. Provide a specific alternative hook.
+    3. **Captions**: Write 3 distinct options (Storytelling, Educational, Controversial).
+    4. **Roast**: Be savage. Roast the lighting, acting, or vibe. Make it funny but true.
+    5. **Monetization**: Identify the niche and suggest sponsors. Write a 1-sentence DM pitch.
+    6. **Thumbnail Architecture**: Design a high-CTR thumbnail concept. Choose contrasting hex colors (e.g., #FF0000 vs #FFFFFF).
+       - Headline: MUST be clickbait but honest.
+       - Layout: Choose best fit (Face-Focus, Split-Screen, etc).
+  `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: {
-        parts: [
-          { inlineData: { mimeType: mimeType, data: base64Video } },
-          {
-            text: `Analyze this video for social media optimization. 
-            Focus on: Hook (First 3s), Production, Monetization, Editing (B-Roll), and a savage Roast.
-            Provide viral captions, hashtags, script structure, suggestions, and the roast.`
-          }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: analysisResponseSchema,
-        temperature: 0.7,
-      }
-    });
+  const response = await ai.models.generateContent({
+    model: modelId,
+    contents: {
+      parts: [
+        { inlineData: { mimeType: mimeType, data: base64Video } },
+        { text: prompt },
+      ],
+    },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: analysisResponseSchema,
+    },
+  });
 
-    if (!response.text) throw new Error("No response received from AI.");
-    return JSON.parse(response.text) as AIAnalysisResult;
-
-  } catch (error) {
-    console.error("Gemini Video Analysis Error:", error);
-    throw error;
-  }
+  const text = response.text;
+  if (!text) throw new Error("No analysis generated.");
+  return JSON.parse(text) as AIAnalysisResult;
 };
 
-export const remixVideoScript = async (
-  base64Video: string,
-  mimeType: string
-): Promise<ScriptRemixResult> => {
-  
-  if (!apiKey) throw new Error("API Key is missing.");
+export const analyzeScriptContent = async (scriptText: string): Promise<AIAnalysisResult> => {
+  const prompt = `
+    You are an expert Script Doctor for viral short-form content.
+    Analyze this script text (or raw idea).
+    
+    Script: "${scriptText}"
+    
+    Provide the same detailed analysis as if you were watching the video, but focus on the writing, pacing, and hook structure.
+    Infer visual opportunities for the 'Visual Quality' and 'B-Roll' sections.
+    
+    For Thumbnail Architecture: Design a concept that would make someone click this text-based topic.
+  `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: {
-        parts: [
-          { inlineData: { mimeType: mimeType, data: base64Video } },
-          {
-            text: "Transcribe the audio exactly. Then create 3 NEW script variations: 'Concise & Fast', 'Story-Driven', and 'Controversial'."
-          }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: remixResponseSchema,
-        temperature: 0.8,
-      }
-    });
+  const response = await ai.models.generateContent({
+    model: modelId,
+    contents: { parts: [{ text: prompt }] },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: analysisResponseSchema,
+    },
+  });
 
-    if (!response.text) throw new Error("No response received from AI.");
-    return JSON.parse(response.text) as ScriptRemixResult;
-
-  } catch (error) {
-    console.error("Gemini Video Remix Error:", error);
-    throw error;
-  }
+  const text = response.text;
+  if (!text) throw new Error("No analysis generated.");
+  return JSON.parse(text) as AIAnalysisResult;
 };
 
-// --- SCRIPT / TEXT Functions ---
+export const remixVideoScript = async (base64Video: string, mimeType: string): Promise<ScriptRemixResult> => {
+  const prompt = `
+    Transcribe the audio from this video exactly.
+    Then, create 3 Remix Variations of this script to help the creator re-record it for better performance:
+    1. **The Hormozi Hook**: Make it faster, punchier, focused on value per second.
+    2. **The Storyteller**: Add an emotional arc or "hero's journey" element.
+    3. **The Controversial Take**: Frame it as a "Hot Take" or "Unpopular Opinion" to drive comments.
+  `;
 
-export const analyzeScriptContent = async (
-  scriptText: string
-): Promise<AIAnalysisResult> => {
-  
-  if (!apiKey) throw new Error("API Key is missing.");
+  const response = await ai.models.generateContent({
+    model: modelId,
+    contents: {
+      parts: [
+        { inlineData: { mimeType: mimeType, data: base64Video } },
+        { text: prompt },
+      ],
+    },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: remixResponseSchema,
+    },
+  });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: {
-        parts: [
-          {
-            text: `Analyze this video SCRIPT for social media optimization.
-            
-            Script: "${scriptText}"
-
-            Since this is text-only:
-            1. Suggest an "Ideal Visual Style" for the visualQuality field.
-            2. Suggest "Recommended Audio/Music" for the audioMood field.
-            3. Analyze the Hook (first sentence).
-            4. Provide B-Roll suggestions based on the text segments.
-            5. Provide a savage Roast of the writing style.
-            
-            Output strictly in JSON.`
-          }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: analysisResponseSchema, // Reusing the same schema for UI consistency
-        temperature: 0.7,
-      }
-    });
-
-    if (!response.text) throw new Error("No response received from AI.");
-    return JSON.parse(response.text) as AIAnalysisResult;
-
-  } catch (error) {
-    console.error("Gemini Script Analysis Error:", error);
-    throw error;
-  }
+  const text = response.text;
+  if (!text) throw new Error("No remix generated.");
+  return JSON.parse(text) as ScriptRemixResult;
 };
 
-export const remixScriptContent = async (
-  scriptText: string
-): Promise<ScriptRemixResult> => {
-  
-  if (!apiKey) throw new Error("API Key is missing.");
+export const remixScriptContent = async (scriptText: string): Promise<ScriptRemixResult> => {
+  const prompt = `
+    Analyze this raw script: "${scriptText}"
+    
+    1. Return the original script (cleaned up).
+    2. Create 3 Remix Variations:
+       - **The Hormozi Hook**: Faster, punchier.
+       - **The Storyteller**: Emotional arc.
+       - **The Controversial Take**: Hot take framing.
+  `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: {
-        parts: [
-          {
-            text: `Here is a draft script: "${scriptText}"
-            
-            1. Return the original script in the 'originalScript' field.
-            2. Create 3 NEW script variations for a creator to record. The variations should be: 'Concise & Fast', 'Story-Driven/Personal', and 'Controversial/Bold'.`
-          }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: remixResponseSchema,
-        temperature: 0.8,
-      }
-    });
+  const response = await ai.models.generateContent({
+    model: modelId,
+    contents: { parts: [{ text: prompt }] },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: remixResponseSchema,
+    },
+  });
 
-    if (!response.text) throw new Error("No response received from AI.");
-    return JSON.parse(response.text) as ScriptRemixResult;
-
-  } catch (error) {
-    console.error("Gemini Script Remix Error:", error);
-    throw error;
-  }
+  const text = response.text;
+  if (!text) throw new Error("No remix generated.");
+  return JSON.parse(text) as ScriptRemixResult;
 };

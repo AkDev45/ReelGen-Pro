@@ -1,5 +1,6 @@
 import React from 'react';
 import { AIAnalysisResult } from '../types';
+import ThumbnailPreview from './ThumbnailPreview';
 
 interface ResultsGridProps {
   results: AIAnalysisResult | null;
@@ -50,6 +51,11 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
             "{results.hookSuggestion}"
           </p>
         </div>
+      </div>
+
+      {/* --- NEW ROW: THUMBNAIL ARCHITECT --- */}
+      <div className="col-span-1 md:col-span-12">
+         <ThumbnailPreview config={results.thumbnailConfig} />
       </div>
 
       {/* --- NEW ROW: REEL GEN ROAST --- */}

@@ -4,6 +4,7 @@ import ResultsGrid from './components/ResultsGrid';
 import ScriptRemixResults from './components/ScriptRemixResults';
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
+import Sidebar from './components/Sidebar';
 import { VideoState, AIAnalysisResult, ScriptRemixResult } from './types';
 import { 
   analyzeVideoContent, 
@@ -18,6 +19,9 @@ type AppView = 'landing' | 'auth' | 'welcome' | 'app';
 function App() {
   // Navigation State
   const [currentView, setCurrentView] = useState<AppView>('landing');
+  
+  // Sidebar State
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Input State
   const [inputType, setInputType] = useState<'video' | 'script'>('video');
@@ -52,7 +56,6 @@ function App() {
     // After 2 seconds, transition to App
     setTimeout(() => {
       setCurrentView('app');
-      // Per requirements: Auto-redirect user to Script Analyzer page
       setInputType('script');
     }, 2000);
   };
@@ -140,60 +143,53 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-50 font-sans selection:bg-indigo-500/30 overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#050505] text-slate-50 font-sans selection:bg-indigo-500/30 overflow-x-hidden relative flex">
       
       {/* Background Ambience */}
       <div className="fixed inset-0 opacity-[0.02] pointer-events-none z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-rose-900/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-      {/* Navbar */}
-      <nav className="sticky top-0 z-40 backdrop-blur-md border-b border-white/5 bg-[#050505]/80">
-          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-             <div 
-               className="cursor-pointer flex items-center gap-3 group"
-               onClick={() => setCurrentView('landing')}
-             >
-                <div className="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                   <span className="text-white font-black text-lg">R</span>
-                </div>
-                <span className="font-bold text-lg tracking-tight text-slate-200 group-hover:text-white transition-colors">ReelGen <span className="text-indigo-500">Pro</span></span>
+      {/* Sidebar */}
+      <Sidebar 
+         currentView={currentView} 
+         onChangeView={setCurrentView} 
+         isCollapsed={isSidebarCollapsed}
+         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+
+      {/* Main Studio Area */}
+      <main className={`flex-1 min-h-screen transition-all duration-300 relative z-10 ${isSidebarCollapsed ? 'ml-20' : 'ml-72'}`}>
+        
+        {/* Top Header (App View) */}
+        <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/5 bg-[#050505]/80 px-8 h-20 flex items-center justify-between">
+           <h1 className="text-xl font-bold text-white tracking-tight">New Project</h1>
+           
+           <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                  <span className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                    System Online
+                  </span>
              </div>
              <button 
                 onClick={() => setCurrentView('landing')}
                 className="text-xs font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2 group"
               >
-                <span>Exit Studio</span>
+                <span>Exit</span>
                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
               </button>
-          </div>
-      </nav>
+           </div>
+        </header>
 
-      {/* Main Studio Area */}
-      <div className="max-w-7xl mx-auto px-6 py-12 relative z-10 animate-in fade-in duration-700">
-        <main className="space-y-12">
+        <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
           
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-end gap-6 pb-6 border-b border-white/5">
-             <div>
-                <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">Creator Studio</h2>
-                <p className="text-slate-400 font-light text-lg">
-                  Upload raw content. Receive viral strategy.
-                </p>
-             </div>
-             
-             {/* Status Indicators */}
-             <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                  <span className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-                    System Online
-                  </span>
-                  <span className="w-px h-3 bg-white/10"></span>
-                  <span className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span>
-                    AI Model Ready
-                  </span>
-             </div>
+          {/* Header Area */}
+          <div className="mb-8">
+             <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">Creator Studio</h2>
+             <p className="text-slate-400 font-light text-lg">
+               Upload raw content. Receive viral strategy.
+             </p>
           </div>
 
           <VideoUploader 
@@ -218,7 +214,7 @@ function App() {
             </div>
           )}
 
-          <div id="results-area" className="scroll-mt-24">
+          <div id="results-area" className="scroll-mt-24 pb-20">
             {mode === 'analyze' && analysisResults && (
               <ResultsGrid results={analysisResults} />
             )}
@@ -228,13 +224,14 @@ function App() {
             )}
           </div>
 
-        </main>
-
+        </div>
+        
         {/* Footer */}
-        <footer className="mt-24 border-t border-white/5 pt-8 text-center text-slate-600 text-xs font-mono">
+        <footer className="border-t border-white/5 py-8 text-center text-slate-600 text-xs font-mono ml-0">
           <p>© {new Date().getFullYear()} Social Hubspot. Engineered for creators.</p>
         </footer>
-      </div>
+
+      </main>
     </div>
   );
 }
