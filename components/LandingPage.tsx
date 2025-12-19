@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { analyzeScriptContent } from '../services/geminiService';
 
 interface LandingPageProps {
@@ -11,10 +11,36 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [demoResult, setDemoResult] = useState<{ score: number; roast: string } | null>(null);
   const [scrollY, setScrollY] = useState(0);
 
+  // FAQ State
+  const [leftOpenIndex, setLeftOpenIndex] = useState<number | null>(null);
+  const [rightOpenIndex, setRightOpenIndex] = useState<number | null>(null);
+
+  // How It Works Animation State
+  const howItWorksRef = useRef<HTMLDivElement>(null);
+  const [stepsVisible, setStepsVisible] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Observer for How It Works section
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStepsVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (howItWorksRef.current) {
+      observer.observe(howItWorksRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   const handleDemoAnalyze = async () => {
@@ -36,6 +62,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       setDemoLoading(false);
     }
   };
+
+  const faqLeft = [
+    { q: "What happens when I paste my script into ReelGen Pro?", a: "ReelGen Pro performs a deep scan analysis of your script — evaluating hook strength, clarity, emotional pull, pacing, and retention risks. You get a complete breakdown of what’s working and what needs improvement before you post." },
+    { q: "Does ReelGen Pro rewrite my script?", a: "No. ReelGen Pro does not rewrite your script. Instead, it tells you what to add, what to remove, and what to improve so you stay in control of your voice while making smarter creative decisions." },
+    { q: "Will this work for Instagram, TikTok, and YouTube Shorts?", a: "Yes. The analysis is optimized for short-form content behavior and works across Instagram Reels, TikTok, and YouTube Shorts." }
+  ];
+
+  const faqRight = [
+    { q: "Will I get captions, hashtags, and posting guidance?", a: "Yes. Along with script analysis, ReelGen Pro provides optimized captions, relevant hashtags, and posting-time guidance." },
+    { q: "Can ReelGen Pro help with monetization?", a: "Yes. ReelGen Pro identifies monetization scope by analyzing content positioning, brand friendliness, and potential sponsorship angles." },
+    { q: "Do I need to upload a video?", a: "No. ReelGen Pro works entirely from your script. Just paste it in — no video upload required." }
+  ];
 
   return (
     <div className="bg-[#020202] text-white selection:bg-indigo-500/30 overflow-x-hidden relative font-sans">
@@ -159,30 +197,49 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
       </section>
 
-      {/* --- HOW IT WORKS: 3 STEPS --- */}
-      <section id="how-it-works" className="py-24 bg-white/[0.01]">
-         <div className="container mx-auto px-6 max-w-6xl">
-            <div className="text-center mb-20">
-               <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">From Idea to Viral in 3 Steps</h2>
-               <p className="text-slate-400">The clear path to creator growth.</p>
+      {/* --- HOW IT WORKS SECTION --- */}
+      <section id="how-it-works" ref={howItWorksRef} className="py-32 bg-white/[0.01] relative overflow-hidden">
+         {/* Background Ambience */}
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl h-[500px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+         
+         <div className="container mx-auto px-6 max-w-7xl relative z-10">
+            <div className="text-center mb-24">
+               <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">From Idea to Viral <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">in 3 Steps</span></h2>
+               <p className="text-slate-400 text-lg">The clear path to creator growth.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-               <Step 
-                 num="1" 
-                 title="Paste Your Script" 
-                 desc="Drop your raw script, into the editor. No formatting needed." 
-               />
-               <Step 
-                 num="2" 
-                 title="ReelGen Deep Scan Analysis" 
-                 desc="ReelGen Pro performs a deep scan of your script and delivers a complete analysis, including hook strength, clarity, emotional triggers, retention risks, and structural gaps — so you know exactly what’s working and what’s not." 
-               />
-               <Step 
-                 num="3" 
-                 title="Post with Clarity" 
-                 desc="Get a proven hook, clear what to add and what to remove in your script, optimized captions, hashtags, posting guidance, and monetization scope — so you publish with confidence, not hope." 
-               />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+               
+               {/* Connector Line (Desktop Only) */}
+               <div className="hidden md:block absolute top-[2.5rem] left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent -z-10"></div>
+
+               {/* Step 1 */}
+               <div className={`transition-all duration-700 delay-0 ease-out ${stepsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <StepCard 
+                    number="01" 
+                    title="Paste Your Script" 
+                    desc="Drop your raw script into the editor. No formatting. No video upload. No complexity." 
+                  />
+               </div>
+
+               {/* Step 2 */}
+               <div className={`transition-all duration-700 delay-200 ease-out ${stepsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <StepCard 
+                    number="02" 
+                    title="ReelGen Deep Scan Analysis" 
+                    desc="ReelGen Pro performs a deep scan of your script to analyze hook strength, clarity, emotional triggers, pacing, and retention risks — showing exactly what’s working and what’s not." 
+                  />
+               </div>
+
+               {/* Step 3 */}
+               <div className={`transition-all duration-700 delay-400 ease-out ${stepsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                  <StepCard 
+                    number="03" 
+                    title="Post with Clarity" 
+                    desc="Get a proven hook direction, what to add and remove in your script, optimized captions, hashtags, posting guidance, and monetization scope — so you publish with confidence, not hope." 
+                  />
+               </div>
+
             </div>
          </div>
       </section>
@@ -307,6 +364,44 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
+      {/* --- FAQ SECTION --- */}
+      <section id="faq" className="py-24 relative">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="text-center mb-16">
+             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Frequently Asked Questions</h2>
+             <p className="text-slate-400">Common questions about ReelGen Pro analysis.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+             {/* Left Column */}
+             <div className="space-y-4">
+                {faqLeft.map((item, i) => (
+                   <FAQItem 
+                      key={i} 
+                      question={item.q} 
+                      answer={item.a} 
+                      isOpen={leftOpenIndex === i} 
+                      onClick={() => setLeftOpenIndex(leftOpenIndex === i ? null : i)} 
+                   />
+                ))}
+             </div>
+             
+             {/* Right Column */}
+             <div className="space-y-4">
+                {faqRight.map((item, i) => (
+                   <FAQItem 
+                      key={i} 
+                      question={item.q} 
+                      answer={item.a} 
+                      isOpen={rightOpenIndex === i} 
+                      onClick={() => setRightOpenIndex(rightOpenIndex === i ? null : i)} 
+                   />
+                ))}
+             </div>
+          </div>
+        </div>
+      </section>
+
       {/* --- CTA SECTION --- */}
       <section className="py-40 relative overflow-hidden text-center">
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-96 bg-indigo-600/10 rounded-full blur-[150px] -z-10"></div>
@@ -350,15 +445,53 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   );
 };
 
-const Step = ({ num, title, desc }: any) => (
-  <div className="text-center space-y-4">
-    <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center font-bold text-xl border border-indigo-500/20 mx-auto mb-6">
-       {num}
-    </div>
-    <h3 className="text-xl font-bold text-white leading-tight">{title}</h3>
-    <p className="text-slate-500 leading-relaxed font-medium">{desc}</p>
+const StepCard = ({ number, title, desc }: any) => (
+  <div 
+     className={`relative p-8 rounded-3xl border border-white/10 bg-[#0A0A0A] group hover:border-indigo-500/50 hover:bg-[#0F0F12] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.2)] flex flex-col items-start text-left h-full`}
+  >
+     {/* Number Badge */}
+     <div className="mb-6 relative">
+        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-slate-800 group-hover:from-indigo-500 group-hover:to-purple-600 transition-all duration-500 select-none">
+           {number}
+        </span>
+        <div className="absolute -bottom-2 left-0 w-8 h-1 bg-slate-800 group-hover:bg-indigo-500 transition-colors duration-500 rounded-full"></div>
+     </div>
+
+     <h3 className="text-xl font-bold text-white mb-4 group-hover:text-indigo-100 transition-colors">
+        {title}
+     </h3>
+     <p className="text-slate-400 leading-relaxed text-sm group-hover:text-slate-300 transition-colors">
+        {desc}
+     </p>
   </div>
 );
+
+const FAQItem = ({ question, answer, isOpen, onClick }: any) => {
+  return (
+    <div 
+      onClick={onClick}
+      className={`group bg-white/5 border border-white/5 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 ${isOpen ? 'border-indigo-500/30 bg-white/[0.07]' : 'hover:border-white/10'}`}
+    >
+      <div className="flex justify-between items-center">
+        <h3 className={`font-bold text-lg transition-colors duration-300 ${isOpen ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+          {question}
+        </h3>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${isOpen ? 'bg-indigo-500 border-indigo-500 rotate-180' : 'border-white/10 bg-white/5 group-hover:border-white/20'}`}>
+           <svg className={`w-4 h-4 transition-colors ${isOpen ? 'text-white' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+        </div>
+      </div>
+      <div 
+        className={`grid transition-[grid-template-rows,opacity,padding] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-4' : 'grid-rows-[0fr] opacity-0 pt-0'}`}
+      >
+        <div className="overflow-hidden">
+           <p className="text-slate-400 leading-relaxed">
+             {answer}
+           </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const FeatureCard = ({ icon, title, desc }: any) => (
   <div className="p-10 bg-white/5 rounded-[2.5rem] border border-white/5 hover:border-white/20 transition-all duration-500 hover:-translate-y-2">
