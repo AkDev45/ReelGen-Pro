@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import VideoUploader from './components/VideoUploader';
 import ResultsGrid from './components/ResultsGrid';
@@ -6,18 +7,22 @@ import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import Sidebar from './components/Sidebar';
 import LearningsPage from './components/LearningsPage';
-import { VideoState, AIAnalysisResult, ScriptRemixResult } from './types';
+import { VideoState, AIAnalysisResult, ScriptRemixResult, User } from './types';
 import { 
   analyzeVideoContent, 
   remixVideoScript, 
   analyzeScriptContent, 
   remixScriptContent 
 } from './services/geminiService';
+import { authService } from './services/authService';
 import { fileToBase64 } from './utils/videoHelpers';
 
 type AppView = 'landing' | 'auth' | 'welcome' | 'app' | 'learnings';
 
 function App() {
+  // User State
+  const [user, setUser] = useState<User | null>(null);
+
   // Navigation State
   const [currentView, setCurrentView] = useState<AppView>('landing');
   
@@ -47,18 +52,35 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Check for existing session on mount
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+      // If we are on landing page but logged in, allow them to stay or go to app
+      // For now, we just restore the user state.
+    }
+  }, []);
+
   // Scroll to top when view changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentView]);
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (loggedInUser: User) => {
+    setUser(loggedInUser);
     setCurrentView('welcome');
     // After 2 seconds, transition to App
     setTimeout(() => {
       setCurrentView('app');
       setInputType('script'); // Explicitly ensure script mode
     }, 2000);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setCurrentView('landing');
   };
 
   const handleFileSelect = (file: File) => {
@@ -123,7 +145,18 @@ function App() {
   // --- RENDER LOGIC ---
 
   if (currentView === 'landing') {
-    return <LandingPage onStart={() => setCurrentView('auth')} />;
+    return (
+      <LandingPage 
+        onStart={() => {
+          // If user is already logged in, skip auth
+          if (user) {
+            setCurrentView('app');
+          } else {
+            setCurrentView('auth');
+          }
+        }} 
+      />
+    );
   }
 
   if (currentView === 'auth') {
@@ -135,7 +168,7 @@ function App() {
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-500">
          <div className="space-y-6">
             <h1 className="text-5xl font-black text-white tracking-tight animate-in slide-in-from-bottom-4 duration-700">
-              Welcome to ReelGen Pro.
+              Welcome, {user?.username}.
             </h1>
             <p className="text-xl text-slate-400 font-light animate-in slide-in-from-bottom-4 duration-700 delay-200">
               Let’s optimize your scripts for maximum virality.
@@ -158,10 +191,12 @@ function App() {
 
       {/* Sidebar */}
       <Sidebar 
+         user={user}
          currentView={currentView} 
          onChangeView={setCurrentView} 
          isCollapsed={isSidebarCollapsed}
          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+         onLogout={handleLogout}
       />
 
       {/* Main Studio Area */}
@@ -184,8 +219,7 @@ function App() {
                 onClick={() => setCurrentView('landing')}
                 className="text-xs font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2 group"
               >
-                <span>Exit</span>
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                <span>Home</span>
               </button>
            </div>
         </header>

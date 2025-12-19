@@ -1,3 +1,4 @@
+
 export interface PostTime {
   label: string;
   score: number;
@@ -92,6 +93,15 @@ export interface ProjectItem {
   date: string;
   type: 'video' | 'script';
   score?: number;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  type: 'creator' | 'coach' | 'brand' | 'business';
+  plan: 'Free' | 'Pro';
+  joinDate: string;
 }
 
 export interface AppState {

@@ -1,15 +1,24 @@
+
 import React from 'react';
+import { User } from '../types';
 
 interface SidebarProps {
+  user: User | null;
   currentView: string;
   onChangeView: (view: any) => void;
   isCollapsed: boolean;
   toggleCollapse: () => void;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isCollapsed, toggleCollapse }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, currentView, onChangeView, isCollapsed, toggleCollapse, onLogout }) => {
   // Fake blur data
   const fakeProjects = [1, 2, 3, 4];
+
+  // Helper to get initials
+  const getInitials = (name: string) => {
+    return name.substring(0, 2).toUpperCase();
+  };
 
   return (
     <aside 
@@ -92,32 +101,40 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isCollapse
       </div>
 
       {/* Footer / User */}
-      <div className="p-4 border-t border-white/5">
-         <button 
-           onClick={toggleCollapse}
-           className="w-full flex items-center justify-center p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all mb-4"
-           title={isCollapsed ? "Expand" : "Collapse"}
-         >
-            {isCollapsed ? (
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
-            ) : (
-               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
-                  Collapse Sidebar
-               </div>
-            )}
-         </button>
-         
-         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
-               JD
-            </div>
-            {!isCollapsed && (
-               <div className="overflow-hidden">
-                  <p className="text-sm font-bold text-white truncate">Jane Doe</p>
-                  <p className="text-xs text-slate-500 truncate">Pro Plan</p>
-               </div>
-            )}
+      <div className="p-4 border-t border-white/5 bg-[#0a0a0a]">
+         <div className="flex flex-col gap-3">
+             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-lg shadow-indigo-500/10">
+                   {user ? getInitials(user.username) : 'G'}
+                </div>
+                {!isCollapsed && user && (
+                   <div className="overflow-hidden">
+                      <p className="text-sm font-bold text-white truncate">{user.username}</p>
+                      <p className="text-[10px] text-indigo-400 truncate uppercase font-bold tracking-wider">{user.plan} Plan</p>
+                   </div>
+                )}
+             </div>
+
+             <button 
+               onClick={onLogout}
+               className={`w-full flex items-center gap-2 p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-900/10 rounded-lg transition-all ${isCollapsed ? 'justify-center' : ''}`}
+               title="Sign Out"
+             >
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                {!isCollapsed && <span className="text-xs font-bold uppercase tracking-wider">Sign Out</span>}
+             </button>
+             
+             <button 
+               onClick={toggleCollapse}
+               className={`w-full flex items-center justify-center p-2 text-slate-700 hover:text-white rounded-lg transition-all mt-1`}
+               title={isCollapsed ? "Expand" : "Collapse"}
+             >
+                {isCollapsed ? (
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                ) : (
+                   <div className="w-full h-1 bg-slate-800 rounded-full group-hover:bg-slate-700"></div>
+                )}
+             </button>
          </div>
       </div>
     </aside>

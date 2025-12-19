@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { analyzeScriptContent } from '../services/geminiService';
 
@@ -343,6 +344,114 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             )}
           </div>
         </div>
+      </section>
+
+      {/* --- USE CASES SECTION (NEW) --- */}
+      <section className="py-32 bg-[#050505] relative border-t border-white/5">
+         <div className="container mx-auto px-6 max-w-6xl relative z-10">
+            <div className="text-center mb-20">
+               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">Built for Every Creator</h2>
+               <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                 Whether you're building a personal brand or running an automation empire, ReelGen Pro adapts to your goals.
+               </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+               
+               {/* Use Case 1: The Expert */}
+               <div className="bg-[#0A0A0A] rounded-[2.5rem] border border-white/10 overflow-hidden group hover:border-indigo-500/30 transition-all duration-500">
+                  <div className="p-10 relative">
+                     <div className="absolute top-0 right-0 p-6 opacity-20 grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <span className="text-8xl">🎓</span>
+                     </div>
+                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-500/20">
+                        For Coaches & Experts
+                     </div>
+                     <h3 className="text-3xl font-bold text-white mb-4">The Authority Builder</h3>
+                     <p className="text-slate-400 leading-relaxed mb-8">
+                        You have the knowledge, but your videos feel like lectures. ReelGen Pro transforms your expertise into viral edutainment.
+                     </p>
+                     
+                     <div className="space-y-4 bg-white/5 rounded-2xl p-6 border border-white/5">
+                        <div className="flex items-start gap-4">
+                           <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0 text-rose-500">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                           </div>
+                           <div>
+                              <p className="text-xs font-bold text-slate-500 uppercase mb-1">Before</p>
+                              <p className="text-sm text-slate-300">"Today I want to talk about three tips for better sleep..." (Scroll past)</p>
+                           </div>
+                        </div>
+                        <div className="w-full h-px bg-white/5"></div>
+                        <div className="flex items-start gap-4">
+                           <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-500">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                           </div>
+                           <div>
+                              <p className="text-xs font-bold text-emerald-500 uppercase mb-1">With ReelGen</p>
+                              <p className="text-sm text-white font-medium">"Stop sleeping 8 hours. It's killing your energy. Do this instead..." (Viral Hook)</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Use Case 2: Creators, Content Writers & SMMs */}
+               <div className="bg-[#0A0A0A] rounded-[2.5rem] border border-white/10 overflow-hidden group hover:border-purple-500/30 transition-all duration-500">
+                  <div className="p-10 relative">
+                     <div className="absolute top-0 right-0 p-6 opacity-20 grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <span className="text-8xl">🚀</span>
+                     </div>
+                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 text-xs font-bold uppercase tracking-wider mb-6 border border-purple-500/20">
+                        For Creators, Writers & SMMs
+                     </div>
+                     <h3 className="text-3xl font-bold text-white mb-8">The Content Powerhouse</h3>
+                     
+                     <div className="space-y-6">
+                        {/* 1) The Script Doctor */}
+                        <div className="flex gap-4">
+                           <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-2xl">
+                              🩺
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-white text-lg mb-1">The Script Doctor</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">
+                                 Diagnoses weak hooks, fixes pacing, and rewrites your ideas into scroll-stopping scripts — fast, story-driven, or bold.
+                              </p>
+                           </div>
+                        </div>
+
+                        {/* 2) Brand Collabs */}
+                        <div className="flex gap-4">
+                           <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-2xl">
+                              💰
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-white text-lg mb-1">Brand Collabs & Monetization</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">
+                                 Crafts high-conversion brand collab cold DMs, pitch angles, and monetizable content ideas — so creators get paid, not ignored.
+                              </p>
+                           </div>
+                        </div>
+
+                        {/* 3) Content Coach */}
+                        <div className="flex gap-4">
+                           <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-2xl">
+                              🤖
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-white text-lg mb-1">All-in-One Content Coach</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">
+                                 One AI that analyzes, teaches, rewrites, and guides — from idea to posting to monetization.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
       </section>
 
       {/* --- FEATURES GRID --- */}
