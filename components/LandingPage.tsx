@@ -341,8 +341,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <a href="#" className="hover:text-white transition-colors">Terms</a>
               <a href="#" className="hover:text-white transition-colors">Contact</a>
            </div>
-           <p className="text-xs opacity-40">
-              © {new Date().getFullYear()} REELGEN PRO • BUILT FOR CREATORS • ALL RIGHTS RESERVED
+           <p className="text-xs text-slate-600">
+              © {new Date().getFullYear()} REELGEN PRO • BUILT FOR CREATORS • ALL RIGHTS RESERVED • BUILT BY <a href="https://www.linkedin.com/in/mohammed-akram-digital-marketer/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-500 transition-colors font-bold">AKRAM</a>
            </p>
         </div>
       </footer>
