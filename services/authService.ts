@@ -26,7 +26,9 @@ export const authService = {
       username: username || email.split('@')[0],
       type: type || 'creator',
       plan: 'Free',
-      joinDate: new Date().toISOString()
+      joinDate: new Date().toISOString(),
+      analysisUsage: 0,
+      projectUsage: 0
     };
 
     users.push(newUser);
@@ -50,6 +52,57 @@ export const authService = {
 
     this.setSession(user);
     return user;
+  },
+
+  // --- Plan Management ---
+  async updateUserPlan(userId: string, newPlan: 'Free' | 'Pro'): Promise<User> {
+    await delay(1500); // Simulate payment processing delay
+
+    const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    const updatedUsers = users.map((u: any) => 
+      u.id === userId ? { ...u, plan: newPlan } : u
+    );
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(updatedUsers));
+
+    // Update current session if it matches the user being updated
+    const session = this.getCurrentUser();
+    if (session && session.id === userId) {
+      const updatedSession = { ...session, plan: newPlan };
+      this.setSession(updatedSession);
+      return updatedSession;
+    }
+
+    throw new Error('User session not found.');
+  },
+
+  // --- Usage Management ---
+  async incrementUsage(userId: string, type: 'analysis' | 'project'): Promise<User> {
+    const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    const userIndex = users.findIndex((u: any) => u.id === userId);
+    
+    if (userIndex === -1) throw new Error('User not found');
+
+    const currentUser = users[userIndex];
+    if (type === 'analysis') {
+      currentUser.analysisUsage = (currentUser.analysisUsage || 0) + 1;
+    } else {
+      currentUser.projectUsage = (currentUser.projectUsage || 0) + 1;
+    }
+
+    users[userIndex] = currentUser;
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+
+    // Update Session
+    const session = this.getCurrentUser();
+    if (session && session.id === userId) {
+      const updatedSession = { ...session, ...currentUser };
+      // Remove password from session just in case
+      const { password, ...safeUser } = updatedSession;
+      this.setSession(safeUser as User);
+      return safeUser as User;
+    }
+
+    return currentUser;
   },
 
   // --- Session Management ---

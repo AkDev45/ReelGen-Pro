@@ -7,6 +7,7 @@ import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import Sidebar from './components/Sidebar';
 import LearningsPage from './components/LearningsPage';
+import PricingPage from './components/PricingPage';
 import { VideoState, AIAnalysisResult, ScriptRemixResult, User } from './types';
 import { 
   analyzeVideoContent, 
@@ -17,7 +18,7 @@ import {
 import { authService } from './services/authService';
 import { fileToBase64 } from './utils/videoHelpers';
 
-type AppView = 'landing' | 'auth' | 'welcome' | 'app' | 'learnings';
+type AppView = 'landing' | 'auth' | 'welcome' | 'app' | 'learnings' | 'pricing';
 
 function App() {
   // User State
@@ -48,6 +49,9 @@ function App() {
   // Results State
   const [analysisResults, setAnalysisResults] = useState<AIAnalysisResult | null>(null);
   const [remixResults, setRemixResults] = useState<ScriptRemixResult | null>(null);
+  
+  // Restricted Mode State for UI
+  const [isRestrictedResult, setIsRestrictedResult] = useState(false);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +87,17 @@ function App() {
     setCurrentView('landing');
   };
 
+  const handlePlanUpdate = async (newPlan: 'Free' | 'Pro') => {
+    if (!user) return;
+    try {
+      const updatedUser = await authService.updateUserPlan(user.id, newPlan);
+      setUser(updatedUser);
+    } catch (err) {
+      console.error("Failed to update plan", err);
+      // Optional: Add toast notification logic here
+    }
+  };
+
   const handleFileSelect = (file: File) => {
     if (videoState.url) URL.revokeObjectURL(videoState.url);
     setVideoState({
@@ -95,6 +110,29 @@ function App() {
   };
 
   const handleProcess = async () => {
+    if (!user) return;
+
+    // --- USAGE & LIMIT LOGIC ---
+    const usage = user.analysisUsage || 0;
+    const isFree = user.plan === 'Free';
+    const limit = isFree ? 3 : 15;
+
+    // Hard Stop Logic
+    if (usage >= limit) {
+      setError(
+        isFree 
+          ? "You’ve used all 3 free analyses. Surface signals won’t grow your account. Upgrade to Golden Pro to continue." 
+          : "You've reached your monthly Pro limit."
+      );
+      return;
+    }
+
+    // Determine Restricted Mode (Free plans, usage 1 or 2)
+    // Usage 0 = Golden Experience (Not restricted)
+    // Usage 1, 2 = Restricted
+    const willBeRestricted = isFree && usage > 0;
+    setIsRestrictedResult(willBeRestricted);
+
     setIsProcessing(true);
     setError(null);
 
@@ -129,6 +167,14 @@ function App() {
         }
       }
       
+      // Increment Usage upon success
+      try {
+        const updatedUser = await authService.incrementUsage(user.id, 'analysis');
+        setUser(updatedUser);
+      } catch (e) {
+        console.error("Failed to update usage count", e);
+      }
+
       // Auto-scroll to results
       setTimeout(() => {
         document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth' });
@@ -205,7 +251,9 @@ function App() {
         {/* Top Header (App View) */}
         <header className="sticky top-0 z-30 backdrop-blur-md border-b border-white/5 bg-[#050505]/80 px-8 h-20 flex items-center justify-between">
            <h1 className="text-xl font-bold text-white tracking-tight">
-             {currentView === 'learnings' ? 'Learning Center' : 'Neural Studio'}
+             {currentView === 'learnings' ? 'Learning Center' : 
+              currentView === 'pricing' ? 'Account & Billing' :
+              'Neural Studio'}
            </h1>
            
            <div className="flex items-center gap-4">
@@ -224,9 +272,15 @@ function App() {
            </div>
         </header>
 
-        {currentView === 'learnings' ? (
+        {currentView === 'learnings' && (
           <LearningsPage />
-        ) : (
+        )}
+
+        {currentView === 'pricing' && user && (
+          <PricingPage user={user} onPlanChange={handlePlanUpdate} />
+        )}
+
+        {currentView === 'app' && (
           <div className="p-8 md:p-12 lg:p-16 max-w-7xl mx-auto space-y-16 animate-in fade-in duration-700">
             
             {/* Header Area */}
@@ -244,6 +298,7 @@ function App() {
             </div>
 
             <VideoUploader 
+              user={user}
               videoState={videoState}
               onFileSelect={handleFileSelect}
               onProcess={handleProcess}
@@ -259,16 +314,30 @@ function App() {
             />
 
             {error && (
-              <div className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-2xl text-rose-300 text-center animate-pulse flex flex-col items-center justify-center gap-2">
+              <div className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-2xl text-rose-300 text-center animate-pulse flex flex-col items-center justify-center gap-4">
                 <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <p className="font-bold">System Interference Detected</p>
-                <p className="text-sm opacity-70">{error}</p>
+                <div className="space-y-2">
+                  <p className="font-bold text-lg">System Interference Detected</p>
+                  <p className="text-sm opacity-90 max-w-md mx-auto">{error}</p>
+                </div>
+                {error.includes("Upgrade") && (
+                   <button 
+                     onClick={() => setCurrentView('pricing')}
+                     className="px-6 py-2 bg-white text-black font-bold rounded-lg text-sm hover:scale-105 transition-transform"
+                   >
+                      Upgrade to Golden Pro
+                   </button>
+                )}
               </div>
             )}
 
             <div id="results-area" className="scroll-mt-32 pb-32">
               {mode === 'analyze' && analysisResults && (
-                <ResultsGrid results={analysisResults} />
+                <ResultsGrid 
+                  results={analysisResults} 
+                  isRestrictedMode={isRestrictedResult} 
+                  onUpgradeClick={() => setCurrentView('pricing')}
+                />
               )}
               
               {mode === 'remix' && remixResults && (

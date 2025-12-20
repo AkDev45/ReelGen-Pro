@@ -66,6 +66,19 @@ const Sidebar: React.FC<SidebarProps> = ({ user, currentView, onChangeView, isCo
            </nav>
         </div>
 
+        <div className="px-4 mb-8">
+           {!isCollapsed && <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Account</h3>}
+           <nav className="space-y-1">
+              <NavItem 
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>}
+                label="Plans & Billing"
+                active={currentView === 'pricing'}
+                collapsed={isCollapsed}
+                onClick={() => onChangeView('pricing')}
+              />
+           </nav>
+        </div>
+
         <div className="px-4 relative group">
            {!isCollapsed && <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Recent Projects</h3>}
            

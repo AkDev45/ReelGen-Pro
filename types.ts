@@ -102,6 +102,8 @@ export interface User {
   type: 'creator' | 'coach' | 'brand' | 'business';
   plan: 'Free' | 'Pro';
   joinDate: string;
+  analysisUsage: number;
+  projectUsage: number;
 }
 
 export interface AppState {

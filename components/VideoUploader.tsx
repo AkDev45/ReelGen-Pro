@@ -1,8 +1,10 @@
+
 import React, { useRef, useEffect, useState } from 'react';
-import { VideoState } from '../types';
+import { VideoState, User } from '../types';
 import Spinner from './Spinner';
 
 interface VideoUploaderProps {
+  user: User | null;
   videoState: VideoState;
   onFileSelect: (file: File) => void;
   onProcess: () => void;
@@ -18,6 +20,7 @@ interface VideoUploaderProps {
 }
 
 const VideoUploader: React.FC<VideoUploaderProps> = ({ 
+  user,
   onProcess,
   isProcessing,
   mode,
@@ -44,6 +47,15 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
 
   const hasContent = scriptText.trim().length > 10;
 
+  // Determine Limit Display
+  const usageDisplay = user ? (
+    user.plan === 'Free' 
+      ? `Free Analyses Used: ${user.analysisUsage || 0} / 3`
+      : `Pro Analyses Used: ${user.analysisUsage || 0} / 15`
+  ) : 'Loading...';
+
+  const isLimitReached = user?.plan === 'Free' && (user.analysisUsage || 0) >= 3;
+
   return (
     <section className="relative group perspective-1000">
       {/* Dynamic Ambient Glows */}
@@ -56,8 +68,10 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
         <div className="flex border-b border-white/5 bg-black/40 px-8 py-3 items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Engine v4.0</span>
+              <div className={`w-2 h-2 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] ${isLimitReached ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                {usageDisplay}
+              </span>
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-[10px] font-mono text-slate-600">LATENCY: 42ms</span>
@@ -67,9 +81,11 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
              <div className="text-[10px] font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                {charCount} CHARS
              </div>
-             <div className="text-[10px] font-mono text-indigo-400 bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 font-bold">
-               PRO MODE
-             </div>
+             {user?.plan === 'Pro' && (
+                <div className="text-[10px] font-mono text-indigo-400 bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 font-bold">
+                  PRO ACTIVE
+                </div>
+             )}
           </div>
         </div>
 

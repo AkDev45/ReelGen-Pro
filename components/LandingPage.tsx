@@ -473,6 +473,152 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
+      {/* --- PRICING SECTION --- */}
+      <section id="pricing" className="py-32 relative border-t border-white/5 bg-[#050505]">
+         <div className="container mx-auto px-6 max-w-5xl relative z-10">
+            {/* Header */}
+            <div className="text-center mb-20">
+               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Stop Guessing. Start Growing.</h2>
+               <p className="text-slate-400 text-lg">Start for free. Upgrade when you're ready to scale.</p>
+            </div>
+
+            {/* Plans Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24 max-w-4xl mx-auto">
+               
+               {/* Free Plan */}
+               <div className="bg-[#0A0A0A] rounded-3xl p-8 border border-white/10 flex flex-col hover:border-white/20 transition-all">
+                  <div className="mb-8">
+                     <p className="text-slate-500 font-bold uppercase text-xs tracking-widest mb-2">The Starter</p>
+                     <h3 className="text-4xl font-black text-white">$0<span className="text-xl font-medium text-slate-500">/mo</span></h3>
+                     <p className="text-slate-400 text-sm mt-4">Perfect for trying ReelGen Pro before committing.</p>
+                  </div>
+                  
+                  <div className="flex-1 space-y-4 mb-8">
+                     <ul className="space-y-3">
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-white">✅</span> 3 Script Analyses total
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-white">✅</span> Basic Viral Score
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-white">✅</span> Hook Grade
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-500">
+                           <span className="opacity-30">❌</span> No deep analysis
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-500">
+                           <span className="opacity-30">❌</span> No Script Doctor rewrites
+                        </li>
+                     </ul>
+                  </div>
+
+                  <button 
+                     onClick={onStart}
+                     className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-colors"
+                  >
+                     Start Free
+                  </button>
+                  <p className="text-center text-[10px] text-slate-600 mt-3 font-medium uppercase tracking-wide">No credit card required</p>
+               </div>
+
+               {/* Pro Plan */}
+               <div className="bg-gradient-to-b from-[#0F0F12] to-[#0A0A0A] rounded-3xl p-8 border border-indigo-500/50 flex flex-col relative shadow-[0_0_40px_-10px_rgba(99,102,241,0.15)] transform md:-translate-y-4">
+                  <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Most Popular</div>
+                  
+                  <div className="mb-8">
+                     <p className="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2">The Creator</p>
+                     <h3 className="text-4xl font-black text-white">$10<span className="text-xl font-medium text-slate-500">/mo</span></h3>
+                     <p className="text-slate-300 text-sm mt-4">For serious creators who want clarity, not guesswork.</p>
+                  </div>
+                  
+                  <div className="flex-1 space-y-4 mb-8">
+                     <ul className="space-y-3">
+                        <li className="flex gap-3 text-sm text-white font-medium">
+                           <span className="text-indigo-400">⚡</span> 15+ Script Analyses / mo
+                        </li>
+                        <li className="flex gap-3 text-sm text-white font-medium">
+                           <span className="text-indigo-400">⚡</span> Full Hook Strength Breakdown
+                        </li>
+                        <li className="flex gap-3 text-sm text-white font-medium">
+                           <span className="text-indigo-400">⚡</span> Script Doctor (Fast, Story, Bold)
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-indigo-400">⚡</span> Deep Caption & Hashtag Analysis
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-indigo-400">⚡</span> Monetization & Brand Collab Insights
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-indigo-400">⚡</span> B-Roll & Visual Direction
+                        </li>
+                        <li className="flex gap-3 text-sm text-slate-300">
+                           <span className="text-indigo-400">⚡</span> Learning Lab Access
+                        </li>
+                     </ul>
+                  </div>
+
+                  <button 
+                     onClick={onStart}
+                     className="w-full py-4 bg-white text-black font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-lg shadow-white/10"
+                  >
+                     Upgrade to Pro
+                  </button>
+                  <p className="text-center text-[10px] text-slate-500 mt-3 font-medium uppercase tracking-wide">Cancel anytime</p>
+               </div>
+            </div>
+
+            {/* Comparison Table */}
+            <div className="overflow-x-auto">
+               <table className="w-full text-left border-collapse">
+                  <thead>
+                     <tr>
+                        <th className="p-4 border-b border-white/10 text-xs font-bold text-slate-500 uppercase tracking-widest w-1/2">Feature Comparison</th>
+                        <th className="p-4 border-b border-white/10 text-xs font-bold text-slate-300 uppercase tracking-widest text-center">Free</th>
+                        <th className="p-4 border-b border-white/10 text-xs font-bold text-indigo-400 uppercase tracking-widest text-center">Pro</th>
+                     </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                     {[
+                        { name: "Monthly Script Analyses", free: "3", pro: "15+" },
+                        { name: "Hook Score", free: "✅", pro: "✅" },
+                        { name: "Caption Performance", free: "✅", pro: "✅" },
+                        { name: "Hashtag Reach", free: "✅", pro: "✅" },
+                        { name: "Script Doctor (Rewrites)", free: "-", pro: "✅" },
+                        { name: "Deep Analysis (Logic)", free: "-", pro: "✅" },
+                        { name: "B-Roll Suggestions", free: "-", pro: "✅" },
+                        { name: "Monetization Insights", free: "-", pro: "✅" },
+                        { name: "Learning Lab Access", free: "-", pro: "✅" },
+                     ].map((row, i) => (
+                        <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02]">
+                           <td className="p-4 text-slate-300 font-medium">{row.name}</td>
+                           <td className="p-4 text-slate-400 text-center">{row.free}</td>
+                           <td className="p-4 text-white text-center font-bold">{row.pro}</td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+
+            {/* Trust Section */}
+            <div className="mt-16 flex flex-col md:flex-row justify-center items-center gap-8 text-sm text-slate-500 font-medium">
+               <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  No long-term contracts
+               </span>
+               <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Upgrade only when ready
+               </span>
+               <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                  Built for creators, not marketers
+               </span>
+            </div>
+
+         </div>
+      </section>
+
       {/* --- FAQ SECTION --- */}
       <section id="faq" className="py-24 relative">
         <div className="container mx-auto px-6 max-w-6xl">
