@@ -9,7 +9,7 @@ import LearningsPage from './components/LearningsPage';
 import PricingPage from './components/PricingPage';
 import SaveProjectModal from './components/SaveProjectModal';
 import GoalSelectionModal from './components/GoalSelectionModal';
-import { VideoState, AIAnalysisResult, ScriptRemixResult, User, ProjectItem, ContentGoal } from './types';
+import { VideoState, AIAnalysisResult, User, ProjectItem, ContentGoal } from './types';
 import { 
   analyzeVideoContent, 
   analyzeScriptContent, 

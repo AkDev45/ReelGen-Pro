@@ -8,7 +8,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const authService = {
   // --- Sign Up ---
-  async signup(email: string, password: string, username: string, type: User['type']): Promise<User> {
+  async signup(email: string, _password: string, username: string, type: User['type']): Promise<User> {
     await delay(1000); // Simulate API latency
 
     // NOTE: Local DB storage removed. 
@@ -30,7 +30,7 @@ export const authService = {
   },
 
   // --- Login ---
-  async login(email: string, password: string): Promise<User> {
+  async login(email: string, _password: string): Promise<User> {
     await delay(1000);
 
     // NOTE: Local DB lookup removed.
@@ -54,7 +54,7 @@ export const authService = {
   },
 
   // --- Plan Management ---
-  async updateUserPlan(userId: string, newPlan: 'Free' | 'Pro'): Promise<User> {
+  async updateUserPlan(_userId: string, newPlan: 'Free' | 'Pro'): Promise<User> {
     await delay(1000); 
 
     // Update the active session only
@@ -69,7 +69,7 @@ export const authService = {
   },
 
   // --- Usage Management ---
-  async incrementUsage(userId: string, type: 'analysis' | 'project'): Promise<User> {
+  async incrementUsage(_userId: string, type: 'analysis' | 'project'): Promise<User> {
     // Update the active session only
     const session = this.getCurrentUser();
     if (session) {
