@@ -1,11 +1,13 @@
+
 import React from 'react';
 import { ScriptRemixResult } from '../types';
 
 interface ScriptRemixResultsProps {
   results: ScriptRemixResult | null;
+  onSave?: () => void;
 }
 
-const ScriptRemixResults: React.FC<ScriptRemixResultsProps> = ({ results }) => {
+const ScriptRemixResults: React.FC<ScriptRemixResultsProps> = ({ results, onSave }) => {
   if (!results) return null;
 
   const copyToClipboard = (text: string) => {
@@ -16,13 +18,24 @@ const ScriptRemixResults: React.FC<ScriptRemixResultsProps> = ({ results }) => {
     <section className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
       
       {/* Header */}
-      <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50">
-        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-purple-300">
-          Script Extractor & Remix
-        </h2>
-        <p className="text-slate-400 text-sm mt-1">
-          Original transcription plus 3 fresh takes to re-record your content.
-        </p>
+      <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-purple-300">
+            Script Extractor & Remix
+          </h2>
+          <p className="text-slate-400 text-sm mt-1">
+            Original transcription plus 3 fresh takes to re-record your content.
+          </p>
+        </div>
+        {onSave && (
+          <button 
+            onClick={onSave}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-2 border border-white/5 shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+            Save Project
+          </button>
+        )}
       </div>
 
       {/* Original Script */}

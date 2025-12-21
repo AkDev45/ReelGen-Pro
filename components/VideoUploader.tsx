@@ -23,8 +23,6 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
   user,
   onProcess,
   isProcessing,
-  mode,
-  setMode,
   scriptText,
   setScriptText,
   autoFocusScript = false
@@ -208,41 +206,13 @@ EXAMPLE: '3 SIMPLE WAYS TO SCALE YOUR BRAND TO $10K...'"
         </div>
 
         {/* --- DYNAMIC ACTION BAR (GLASS FOOTER) --- */}
-        {/* Restructured for better spacing and to prevent overlapping */}
-        <div className="bg-black/80 backdrop-blur-3xl border-t border-white/5 p-6 md:p-8 flex flex-col lg:flex-row items-center justify-between gap-10 relative z-30">
+        <div className="bg-black/80 backdrop-blur-3xl border-t border-white/5 p-6 md:p-8 flex items-center justify-end relative z-30">
           
-          {/* Advanced Mode Selector */}
-          <div className="flex flex-col gap-3 w-full lg:w-auto min-w-[320px]">
-            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-2">Execution Protocol</span>
-            <div className="flex bg-[#050505] p-2 rounded-[1.25rem] border border-white/10 w-full lg:w-max shadow-inner relative overflow-hidden">
-               <button
-                 onClick={() => setMode('analyze')}
-                 className={`flex-1 px-5 md:px-7 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative z-10 whitespace-nowrap ${
-                   mode === 'analyze' 
-                     ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
-                     : 'text-slate-500 hover:text-slate-300'
-                 }`}
-               >
-                 Script & Strategy Analysis
-               </button>
-               <button
-                 onClick={() => setMode('remix')}
-                 className={`flex-1 px-5 md:px-7 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative z-10 whitespace-nowrap ${
-                   mode === 'remix' 
-                     ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]' 
-                     : 'text-slate-500 hover:text-slate-300'
-                 }`}
-               >
-                 Remix Content
-               </button>
-            </div>
-          </div>
-
           {/* Neural Action Button */}
           <div className="relative w-full lg:w-auto group/btn">
             {/* Pulsing Aura */}
             {!isProcessing && hasContent && (
-               <div className={`absolute inset-0 blur-2xl opacity-20 animate-pulse rounded-2xl pointer-events-none transition-colors duration-500 ${mode === 'remix' ? 'bg-indigo-500' : 'bg-white'}`}></div>
+               <div className="absolute inset-0 blur-2xl opacity-20 animate-pulse rounded-2xl pointer-events-none transition-colors duration-500 bg-white"></div>
             )}
             
             <button
@@ -251,22 +221,20 @@ EXAMPLE: '3 SIMPLE WAYS TO SCALE YOUR BRAND TO $10K...'"
               className={`relative w-full lg:w-auto lg:min-w-[340px] py-5 px-10 rounded-2xl font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 transition-all transform active:scale-[0.97]
                 ${!hasContent || isProcessing 
                   ? 'bg-slate-900 text-slate-700 border border-slate-800 cursor-not-allowed grayscale' 
-                  : mode === 'remix'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.02] text-white border border-indigo-500/50 shadow-xl shadow-indigo-500/20 group-hover/btn:shadow-indigo-500/40'
-                    : 'bg-white text-black hover:scale-[1.02] shadow-xl shadow-white/5 group-hover/btn:shadow-white/20'
+                  : 'bg-white text-black hover:scale-[1.02] shadow-xl shadow-white/5 group-hover/btn:shadow-white/20'
                 }`}
             >
               {isProcessing ? (
                 <>
-                  <Spinner size="sm" className={mode === 'remix' ? "border-white" : "border-slate-800"} />
+                  <Spinner size="sm" className="border-slate-800" />
                   <span className="animate-pulse">Synthesizing Nodes...</span>
                 </>
               ) : (
                 <>
                   <span className="flex-1 text-center">
-                    {mode === 'remix' ? "Generate Neural Remixes" : "Run Strategic Deep-Scan"}
+                    Run Strategic Deep-Scan
                   </span>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${mode === 'remix' ? 'bg-white/10' : 'bg-black/5'}`}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-black/5">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                   </div>
                 </>

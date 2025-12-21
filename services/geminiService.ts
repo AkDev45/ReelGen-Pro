@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AIAnalysisResult, ScriptRemixResult, HookAnalysisResult } from "../types";
+import { AIAnalysisResult, ScriptRemixResult, HookAnalysisResult, ContentGoal } from "../types";
 
 // Initialize Gemini SDK
 const apiKey = process.env.API_KEY || "";
@@ -105,13 +106,42 @@ const analysisResponseSchema: Schema = {
         tweakLogic: { type: Type.STRING }
       },
       description: "Golden Pro Feature: Specific sentences/concepts to add or remove to maximize retention."
+    },
+    rewrite: {
+      type: Type.OBJECT,
+      properties: {
+        optimizedScript: { type: Type.STRING, description: "The full rewritten script formatted with HOOK, BODY, CTA labels." },
+        comparison: {
+          type: Type.OBJECT,
+          properties: {
+            hookStrength: {
+              type: Type.OBJECT,
+              properties: { original: {type: Type.NUMBER}, optimized: {type: Type.NUMBER} }
+            },
+            retentionPotential: {
+              type: Type.OBJECT,
+              properties: { original: {type: Type.NUMBER}, optimized: {type: Type.NUMBER} }
+            },
+            ctaAlignment: {
+              type: Type.OBJECT,
+              properties: { original: {type: Type.NUMBER}, optimized: {type: Type.NUMBER} }
+            },
+            viralPotential: {
+              type: Type.OBJECT,
+              properties: { original: {type: Type.NUMBER}, optimized: {type: Type.NUMBER} }
+            }
+          }
+        },
+        insight: { type: Type.STRING, description: "One-line insight on why this performs better." }
+      },
+      description: "Golden Pro Feature: Optimized Script Rewrite."
     }
   },
   required: [
     "captions", "hashtags", "postTimes", "storyIdeas", "script", "viralScore",
     "hookStrength", "hookSuggestion", "visualQuality", "audioMood",
     "engagementBait", "keywords", "roast", "bRollSuggestions", "brandDealScout",
-    "scriptAdjustments"
+    "scriptAdjustments", "rewrite"
   ],
 };
 
@@ -145,24 +175,83 @@ const hookAnalysisResponseSchema: Schema = {
   required: ["score", "critique", "rewrites", "emotionalTrigger", "whyItWorks"]
 };
 
+// --- Helper for Goal Logic ---
+const getGoalContext = (goal: ContentGoal) => {
+  switch(goal) {
+    case 'growth':
+      return `
+        **GOAL: GROW FOLLOWERS (Reach & Shareability)**.
+        - Hook Score: Must be brutal. If it's not broad appeal or shocking, score it low.
+        - CTAs: Focus on "Share this" or "Follow for more".
+        - Roast: Roast them for being boring or too niche.
+        - Monetization: Focus on mass appeal brand deals.
+        - Script: Optimize for loops and controversial statements.
+      `;
+    case 'leads':
+      return `
+        **GOAL: GET LEADS (Trust & Authority)**.
+        - Hook Score: Focus on identifying the target audience's pain point immediately.
+        - CTAs: Focus on "Comment [KEYWORD]" automation or "DM me".
+        - Roast: Roast them for looking unprofessional or lacking authority.
+        - Script: Ensure they demonstrate expertise before asking for the lead.
+      `;
+    case 'sales':
+      return `
+        **GOAL: SELL PRODUCT (Urgency & Conversion)**.
+        - Hook Score: Must clearly state the benefit/result of the product.
+        - CTAs: Focus on "Click the link in bio" or "Grab yours now".
+        - Roast: Roast them for not selling hard enough or being too vague about the offer.
+        - Script: Use Problem-Agitation-Solution framework.
+      `;
+    case 'brand':
+      return `
+        **GOAL: ATTRACT BRANDS (Safety & Quality)**.
+        - Hook Score: Focus on visual quality and professional presentation.
+        - CTAs: Focus on community engagement.
+        - Roast: Roast bad lighting, messy backgrounds, or risky topics that scare sponsors.
+        - Monetization: Pitch specifically to high-ticket brands.
+      `;
+    default:
+      return "";
+  }
+};
+
 // --- Analysis Functions ---
 
-export const analyzeVideoContent = async (base64Video: string, mimeType: string): Promise<AIAnalysisResult> => {
+export const analyzeVideoContent = async (base64Video: string, mimeType: string, goal: ContentGoal = 'growth'): Promise<AIAnalysisResult> => {
+  const goalContext = getGoalContext(goal);
   const prompt = `
-    You are an expert Social Media Strategist and Video Editor for top creators (MrBeast, Alex Hormozi style).
+    You are an expert Social Media Strategist. 
+    ${goalContext}
+
     Analyze this video for Instagram Reels / TikTok / YouTube Shorts.
     
-    Provide a brutally honest critique and actionable strategy.
-    
-    1. **Viral Score**: Rate 0-100 based on retention loops, hook, and value.
-    2. **Hook**: Critique the first 3s. Provide a specific alternative hook.
-    3. **Captions**: Write 3 distinct options (Storytelling, Educational, Controversial).
-    4. **Roast**: Be savage. Roast the lighting, acting, or vibe. Make it funny but true.
-    5. **Monetization**: Identify the niche and suggest sponsors. Write a 1-sentence DM pitch.
-    6. **Script Doctor (Golden Feature)**: 
-       - Identify 3 specific things to **ADD** to the script (missing value, context, emotional cues).
-       - Identify 3 specific things to **REMOVE** (fluff, slow intros, jargon).
-       - Explain the logic.
+    1. **Viral Score**: Rate 0-100 based on the user's specific GOAL defined above.
+    2. **Hook**: Critique the first 3s. Provide a specific alternative hook aligned with the GOAL.
+    3. **Captions**: Write 3 distinct options tailored to the GOAL.
+    4. **Roast**: Be savage, but specifically roast why they won't achieve their GOAL.
+    5. **Monetization**: Identify the niche.
+    6. **Script Doctor**: Add/Remove elements to specifically achieve the GOAL.
+
+    =====================================
+    GOLDEN PRO FEATURE: OPTIMIZED REWRITE
+    =====================================
+    Rewrite the script to achieve the specific GOAL: ${goal}.
+
+    REWRITE RULES:
+    1. HOOK (1-2 lines): Pattern interrupt, Emotion-first, No intro/context.
+    2. BODY: Clear progression, One main message, Retention checkpoints, Short-form optimized language.
+    3. CTA: Must align with GOAL (${goal}), Natural/Not pushy, Clear next action.
+
+    OPTIMIZATION GOAL:
+    - Push script to MAXIMUM ACHIEVABLE VIRAL POTENTIAL.
+    - Outperform original.
+    - Be believable, sharp, platform-native.
+
+    Provide the 'rewrite' object with:
+    - 'optimizedScript': The full text with HOOK / BODY / CTA labels.
+    - 'comparison': Score Original vs Optimized (0-10) for Hook Strength, Retention Potential, CTA Alignment, Viral Potential.
+    - 'insight': One-line explanation of WHY this version wins for the goal.
   `;
 
   const response = await ai.models.generateContent({
@@ -181,21 +270,42 @@ export const analyzeVideoContent = async (base64Video: string, mimeType: string)
 
   const text = response.text;
   if (!text) throw new Error("No analysis generated.");
-  return JSON.parse(text) as AIAnalysisResult;
+  const result = JSON.parse(text) as AIAnalysisResult;
+  result.goal = goal; // Attach goal to result for UI reference
+  return result;
 };
 
-export const analyzeScriptContent = async (scriptText: string): Promise<AIAnalysisResult> => {
+export const analyzeScriptContent = async (scriptText: string, goal: ContentGoal = 'growth'): Promise<AIAnalysisResult> => {
+  const goalContext = getGoalContext(goal);
   const prompt = `
-    You are an expert Script Doctor for viral short-form content.
-    Analyze this script text (or raw idea).
+    You are an expert Script Doctor.
+    ${goalContext}
     
+    Analyze this script text (or raw idea).
     Script: "${scriptText}"
     
     Provide the same detailed analysis as if you were watching the video.
-    
-    Crucial: Fill out the 'scriptAdjustments' section with high precision:
-    - What specific lines or concepts are missing? (ADD)
-    - What is killing retention? (REMOVE)
+    Crucial: Fill out the 'scriptAdjustments' section with high precision to help them hit their GOAL.
+
+    =====================================
+    GOLDEN PRO FEATURE: OPTIMIZED REWRITE
+    =====================================
+    Rewrite the script to achieve the specific GOAL: ${goal}.
+
+    REWRITE RULES:
+    1. HOOK (1-2 lines): Pattern interrupt, Emotion-first, No intro/context.
+    2. BODY: Clear progression, One main message, Retention checkpoints, Short-form optimized language.
+    3. CTA: Must align with GOAL (${goal}), Natural/Not pushy, Clear next action.
+
+    OPTIMIZATION GOAL:
+    - Push script to MAXIMUM ACHIEVABLE VIRAL POTENTIAL.
+    - Outperform original.
+    - Be believable, sharp, platform-native.
+
+    Provide the 'rewrite' object with:
+    - 'optimizedScript': The full text with HOOK / BODY / CTA labels.
+    - 'comparison': Score Original vs Optimized (0-10) for Hook Strength, Retention Potential, CTA Alignment, Viral Potential.
+    - 'insight': One-line explanation of WHY this version wins for the goal.
   `;
 
   const response = await ai.models.generateContent({
@@ -209,7 +319,9 @@ export const analyzeScriptContent = async (scriptText: string): Promise<AIAnalys
 
   const text = response.text;
   if (!text) throw new Error("No analysis generated.");
-  return JSON.parse(text) as AIAnalysisResult;
+  const result = JSON.parse(text) as AIAnalysisResult;
+  result.goal = goal;
+  return result;
 };
 
 export const remixVideoScript = async (base64Video: string, mimeType: string): Promise<ScriptRemixResult> => {

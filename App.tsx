@@ -2,20 +2,20 @@
 import { useState, useRef, useEffect } from 'react';
 import VideoUploader from './components/VideoUploader';
 import ResultsGrid from './components/ResultsGrid';
-import ScriptRemixResults from './components/ScriptRemixResults';
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import Sidebar from './components/Sidebar';
 import LearningsPage from './components/LearningsPage';
 import PricingPage from './components/PricingPage';
-import { VideoState, AIAnalysisResult, ScriptRemixResult, User } from './types';
+import SaveProjectModal from './components/SaveProjectModal';
+import GoalSelectionModal from './components/GoalSelectionModal';
+import { VideoState, AIAnalysisResult, ScriptRemixResult, User, ProjectItem, ContentGoal } from './types';
 import { 
   analyzeVideoContent, 
-  remixVideoScript, 
   analyzeScriptContent, 
-  remixScriptContent 
 } from './services/geminiService';
 import { authService } from './services/authService';
+import { projectService } from './services/projectService';
 import { fileToBase64 } from './utils/videoHelpers';
 
 type AppView = 'landing' | 'auth' | 'welcome' | 'app' | 'learnings' | 'pricing';
@@ -43,13 +43,20 @@ function App() {
   // Script Input State
   const [scriptText, setScriptText] = useState('');
   
-  // App Mode State
+  // App Mode State - Always 'analyze' now
   const [mode, setMode] = useState<'analyze' | 'remix'>('analyze');
   
   // Results State
   const [analysisResults, setAnalysisResults] = useState<AIAnalysisResult | null>(null);
-  const [remixResults, setRemixResults] = useState<ScriptRemixResult | null>(null);
   
+  // Project State
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [defaultProjectTitle, setDefaultProjectTitle] = useState('');
+
+  // Goal Selection State
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+
   // Restricted Mode State for UI
   const [isRestrictedResult, setIsRestrictedResult] = useState(false);
   
@@ -61,8 +68,7 @@ function App() {
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-      // If we are on landing page but logged in, allow them to stay or go to app
-      // For now, we just restore the user state.
+      setProjects(projectService.getProjects(currentUser.id));
     }
   }, []);
 
@@ -73,6 +79,7 @@ function App() {
 
   const handleAuthSuccess = (loggedInUser: User) => {
     setUser(loggedInUser);
+    setProjects(projectService.getProjects(loggedInUser.id));
     setCurrentView('welcome');
     // After 2 seconds, transition to App
     setTimeout(() => {
@@ -84,6 +91,7 @@ function App() {
   const handleLogout = () => {
     authService.logout();
     setUser(null);
+    setProjects([]);
     setCurrentView('landing');
   };
 
@@ -94,7 +102,6 @@ function App() {
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update plan", err);
-      // Optional: Add toast notification logic here
     }
   };
 
@@ -105,11 +112,11 @@ function App() {
       url: URL.createObjectURL(file),
     });
     setAnalysisResults(null);
-    setRemixResults(null);
     setError(null);
   };
 
-  const handleProcess = async () => {
+  // STEP 1: INITIATE PROCESS -> CHECKS LIMITS & OPENS MODAL
+  const handleInitiateProcess = () => {
     if (!user) return;
 
     // --- USAGE & LIMIT LOGIC ---
@@ -133,6 +140,15 @@ function App() {
     const willBeRestricted = isFree && usage > 0;
     setIsRestrictedResult(willBeRestricted);
 
+    // Always open goal modal for analysis
+    setIsGoalModalOpen(true);
+  };
+
+  // STEP 2: EXECUTE ANALYSIS AFTER GOAL SELECTION
+  const executeAnalysis = async (selectedGoal: ContentGoal | null) => {
+    if (!user) return;
+    
+    setIsGoalModalOpen(false);
     setIsProcessing(true);
     setError(null);
 
@@ -142,29 +158,17 @@ function App() {
         
         const base64Video = await fileToBase64(videoState.file);
         
-        if (mode === 'analyze') {
-          const result = await analyzeVideoContent(base64Video, videoState.file.type);
-          setAnalysisResults(result);
-          setRemixResults(null);
-        } else {
-          const result = await remixVideoScript(base64Video, videoState.file.type);
-          setRemixResults(result);
-          setAnalysisResults(null);
-        }
+        // Pass the selected goal to the analysis
+        const result = await analyzeVideoContent(base64Video, videoState.file.type, selectedGoal || 'growth');
+        setAnalysisResults(result);
 
       } else {
         // Script Input Mode
         if (!scriptText.trim()) return;
 
-        if (mode === 'analyze') {
-          const result = await analyzeScriptContent(scriptText);
-          setAnalysisResults(result);
-          setRemixResults(null);
-        } else {
-          const result = await remixScriptContent(scriptText);
-          setRemixResults(result);
-          setAnalysisResults(null);
-        }
+         // Pass the selected goal to the analysis
+        const result = await analyzeScriptContent(scriptText, selectedGoal || 'growth');
+        setAnalysisResults(result);
       }
       
       // Increment Usage upon success
@@ -185,6 +189,97 @@ function App() {
       setError(`Failed to process content. ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleOpenSaveModal = () => {
+    if (!user || (!analysisResults)) return;
+
+    const savedCount = projects.length;
+    const isFree = user.plan === 'Free';
+
+    // Rule: Free max 1, Pro max 15
+    if (isFree && savedCount >= 1) {
+      setError("Free plan allows saving 1 project only. Golden Pro lets you save and revisit 15. Upgrade to Golden Pro.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    if (!isFree && savedCount >= 15) {
+      setError("You have reached the maximum of 15 saved projects for Pro.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Generate Default Name
+    let title = "Untitled Project";
+    if (analysisResults) {
+      title = analysisResults.script.slice(0, 30).replace(/\n/g, ' ') + (analysisResults.script.length > 30 ? "..." : "");
+    }
+    
+    setDefaultProjectTitle(title);
+    setIsSaveModalOpen(true);
+  };
+
+  const handleConfirmSave = async (title: string) => {
+    if (!user) return;
+    
+    let score = 0;
+    if (analysisResults) {
+      score = analysisResults.viralScore;
+    }
+
+    const newProject: ProjectItem = {
+      id: crypto.randomUUID(),
+      title: title,
+      date: new Date().toLocaleDateString(),
+      type: inputType, 
+      score: score,
+      mode: 'analyze',
+      analysisData: analysisResults || undefined,
+      scriptContent: scriptText,
+      goal: analysisResults?.goal // Save the goal context
+    };
+
+    projectService.saveProject(user.id, newProject);
+    
+    // Increment Usage Stats
+    try {
+      const updatedUser = await authService.incrementUsage(user.id, 'project');
+      setUser(updatedUser);
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Refresh projects list
+    setProjects(projectService.getProjects(user.id));
+    
+    setIsSaveModalOpen(false);
+  };
+
+  const handleLoadProject = (project: ProjectItem) => {
+    setCurrentView('app');
+    setMode('analyze');
+    setInputType(project.type);
+    if (project.scriptContent) setScriptText(project.scriptContent);
+    
+    // Reset current results first to trigger animation
+    setAnalysisResults(null);
+    
+    // Delay slightly for smooth transition
+    setTimeout(() => {
+      if (project.analysisData) {
+        setAnalysisResults(project.analysisData);
+      }
+      
+      // Auto-scroll to results
+      setTimeout(() => {
+         document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }, 100);
+
+    if (window.innerWidth < 1024) {
+      setIsSidebarCollapsed(true);
     }
   };
 
@@ -238,8 +333,10 @@ function App() {
       {/* Sidebar */}
       <Sidebar 
          user={user}
+         projects={projects}
          currentView={currentView} 
          onChangeView={setCurrentView} 
+         onLoadProject={handleLoadProject}
          isCollapsed={isSidebarCollapsed}
          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
          onLogout={handleLogout}
@@ -301,7 +398,7 @@ function App() {
               user={user}
               videoState={videoState}
               onFileSelect={handleFileSelect}
-              onProcess={handleProcess}
+              onProcess={handleInitiateProcess} // Changed to open Modal first
               isProcessing={isProcessing}
               mode={mode}
               setMode={setMode}
@@ -337,11 +434,8 @@ function App() {
                   results={analysisResults} 
                   isRestrictedMode={isRestrictedResult} 
                   onUpgradeClick={() => setCurrentView('pricing')}
+                  onSave={handleOpenSaveModal}
                 />
-              )}
-              
-              {mode === 'remix' && remixResults && (
-                <ScriptRemixResults results={remixResults} />
               )}
             </div>
 
@@ -354,6 +448,21 @@ function App() {
         </footer>
 
       </main>
+
+      {/* Modals */}
+      <SaveProjectModal 
+        isOpen={isSaveModalOpen} 
+        onClose={() => setIsSaveModalOpen(false)} 
+        onSave={handleConfirmSave} 
+        defaultTitle={defaultProjectTitle}
+      />
+      
+      <GoalSelectionModal
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        onSelect={executeAnalysis}
+      />
+
     </div>
   );
 }

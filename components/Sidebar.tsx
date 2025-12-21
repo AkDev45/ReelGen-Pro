@@ -1,20 +1,19 @@
 
 import React from 'react';
-import { User } from '../types';
+import { User, ProjectItem } from '../types';
 
 interface SidebarProps {
   user: User | null;
+  projects: ProjectItem[];
   currentView: string;
   onChangeView: (view: any) => void;
+  onLoadProject?: (project: ProjectItem) => void;
   isCollapsed: boolean;
   toggleCollapse: () => void;
   onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user, currentView, onChangeView, isCollapsed, toggleCollapse, onLogout }) => {
-  // Fake blur data
-  const fakeProjects = [1, 2, 3, 4];
-
+const Sidebar: React.FC<SidebarProps> = ({ user, projects, currentView, onChangeView, onLoadProject, isCollapsed, toggleCollapse, onLogout }) => {
   // Helper to get initials
   const getInitials = (name: string) => {
     return name.substring(0, 2).toUpperCase();
@@ -82,33 +81,29 @@ const Sidebar: React.FC<SidebarProps> = ({ user, currentView, onChangeView, isCo
         <div className="px-4 relative group">
            {!isCollapsed && <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Recent Projects</h3>}
            
-           {/* Coming Soon Overlay */}
-           <div className={`absolute inset-0 z-10 flex items-center justify-center bg-[#080808]/10 backdrop-blur-[1px] transition-opacity ${isCollapsed ? 'opacity-0 hover:opacity-100' : ''}`}>
-             {!isCollapsed && (
-               <div className="bg-black/80 border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-md">
-                 <svg className="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                 <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wide">Syncing History...</span>
-               </div>
-             )}
-           </div>
-
-           {/* Blurred Content */}
-           <div className="space-y-1 opacity-20 select-none grayscale" aria-hidden="true">
-              {fakeProjects.map((id) => (
-                <div
-                  key={id}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : 'justify-start'}`}
-                >
-                  <div className="w-2 h-2 rounded-full bg-slate-600 shrink-0"></div>
-                  
-                  {!isCollapsed && (
-                    <div className="text-left w-full">
-                      <div className="h-3 bg-slate-700 rounded w-3/4 mb-1.5"></div>
-                      <div className="h-2 bg-slate-800 rounded w-1/2"></div>
-                    </div>
-                  )}
+           <div className="space-y-1">
+              {projects.length === 0 ? (
+                <div className={`text-slate-600 text-xs italic p-2 ${isCollapsed ? 'hidden' : 'block'}`}>
+                   No saved projects yet.
                 </div>
-              ))}
+              ) : (
+                projects.map((project) => (
+                  <div
+                    key={project.id}
+                    onClick={() => onLoadProject && onLoadProject(project)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 cursor-pointer group transition-all ${isCollapsed ? 'justify-center' : 'justify-start'}`}
+                  >
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${project.score && project.score > 80 ? 'bg-emerald-500' : 'bg-slate-600'}`}></div>
+                    
+                    {!isCollapsed && (
+                      <div className="text-left w-full overflow-hidden">
+                        <div className="text-sm text-slate-300 font-medium truncate">{project.title}</div>
+                        <div className="text-[10px] text-slate-500">{project.date}</div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
            </div>
         </div>
       </div>

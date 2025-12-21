@@ -1,4 +1,6 @@
 
+export type ContentGoal = 'growth' | 'leads' | 'sales' | 'brand';
+
 export interface PostTime {
   label: string;
   score: number;
@@ -22,6 +24,22 @@ export interface ScriptImprovement {
   tweakLogic: string;
 }
 
+export interface ComparisonMetric {
+  original: number;
+  optimized: number;
+}
+
+export interface ScriptRewrite {
+  optimizedScript: string;
+  comparison: {
+    hookStrength: ComparisonMetric;
+    retentionPotential: ComparisonMetric;
+    ctaAlignment: ComparisonMetric;
+    viralPotential: ComparisonMetric;
+  };
+  insight: string;
+}
+
 export interface AIAnalysisResult {
   captions: string[];
   hashtags: string[];
@@ -41,6 +59,9 @@ export interface AIAnalysisResult {
   bRollSuggestions: BRollSuggestion[];
   brandDealScout: BrandDealScout;
   scriptAdjustments: ScriptImprovement;
+  rewrite: ScriptRewrite;
+  // Metadata
+  goal?: ContentGoal;
 }
 
 export interface ScriptVariation {
@@ -93,6 +114,12 @@ export interface ProjectItem {
   date: string;
   type: 'video' | 'script';
   score?: number;
+  // Stored Data for re-opening
+  mode?: 'analyze' | 'remix';
+  analysisData?: AIAnalysisResult;
+  remixData?: ScriptRemixResult;
+  scriptContent?: string;
+  goal?: ContentGoal;
 }
 
 export interface User {
